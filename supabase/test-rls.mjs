@@ -128,7 +128,7 @@ check('Création d\'une actualité fédérale refusée', r.status >= 400, `statu
 
 // ---------------------------------------------------------------------
 console.log('\n=== 2. ADMIN FÉDÉRAL (admin@fimf.ci) ===');
-const admToken = await signIn('admin@fimf.ci', '***REMOVED***');
+const admToken = await signIn('admin@fimf.ci', process.env.ADMIN_PASSWORD ?? '***REMOVED***');
 const adm = rest(admToken);
 
 // 2a. Il peut modifier n'importe quel club

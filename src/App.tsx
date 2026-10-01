@@ -9,6 +9,7 @@ import { CompetitionsView } from './components/views/CompetitionsView';
 import { EquipesView } from './components/views/EquipesView';
 import { ClassementView } from './components/views/ClassementView';
 import { ActualitesView } from './components/views/ActualitesView';
+import { ArticleView } from './components/views/ArticleView';
 import { GalerieView } from './components/views/GalerieView';
 import { ContactView } from './components/views/ContactView';
 import { AdminDashboardView } from './components/views/AdminDashboardView';
@@ -156,7 +157,7 @@ function AppInner() {
   // Sous-onglet demandé par navigation profonde (menu déroulant) — consommé par la vue cible
   const [pendingSubTab, setPendingSubTab] = useState<string | undefined>(undefined);
   const { user, loading: authLoading } = useAuth();
-  const { clubs: liveClubs, gallery: liveGallery } = useFimfData();
+  const { clubs: liveClubs, gallery: liveGallery, news: liveNews } = useFimfData();
   const { favoriteIds, favoriteClubs, isFavorite, toggleFavorite } = useFavoriteClubs();
   const {
     notifications,
@@ -171,6 +172,8 @@ function AppInner() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  // Article affiché en page dédiée (plein écran) — remplace le popup
+  const [pageArticle, setPageArticle] = useState<NewsArticle | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -181,6 +184,21 @@ function AppInner() {
   const handleNavigate = (page: NavPage) => {
     setCurrentPage(page);
     setPendingSubTab(undefined);
+    if (page !== 'article') setPageArticle(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /** Ouvre un article en page dédiée. */
+  const handleOpenArticlePage = (article: NewsArticle) => {
+    setPageArticle(article);
+    setCurrentPage('article');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /** Retour depuis la page article vers les actualités. */
+  const handleBackFromArticle = () => {
+    setPageArticle(null);
+    setCurrentPage('actualites');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -215,7 +233,7 @@ function AppInner() {
         onExit={() => handleNavigate('accueil')}
         onSelectClub={setSelectedClub}
         onSelectMatch={setSelectedMatch}
-        onSelectArticle={setSelectedArticle}
+        onSelectArticle={handleOpenArticlePage}
         onSelectCompetition={setSelectedCompetition}
       />
     );
@@ -271,7 +289,7 @@ function AppInner() {
           <AccueilView
             onNavigate={handleNavigate}
             onSelectClub={setSelectedClub}
-            onSelectArticle={setSelectedArticle}
+            onSelectArticle={handleOpenArticlePage}
             onSelectMatch={setSelectedMatch}
             onSelectCompetition={setSelectedCompetition}
             onOpenPhotoLightbox={(index) => setLightboxIndex(index)}
@@ -334,7 +352,7 @@ function AppInner() {
 
         {currentPage === 'actualites' && (
           <ActualitesView
-            onSelectArticle={setSelectedArticle}
+            onSelectArticle={handleOpenArticlePage}
           />
         )}
 
@@ -345,6 +363,18 @@ function AppInner() {
         )}
 
         {currentPage === 'contact' && <ContactView />}
+
+        {currentPage === 'article' && (
+          <ArticleView
+            article={pageArticle}
+            onBack={handleBackFromArticle}
+            related={(pageArticle
+              ? liveNews.filter((a) => a.category === pageArticle.category && a.id !== pageArticle.id)
+              : []
+            ).slice(0, 3)}
+            onOpenArticle={handleOpenArticlePage}
+          />
+        )}
       </main>
 
       {/* Footer */}
@@ -408,7 +438,7 @@ function AppInner() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelectClub={setSelectedClub}
-        onSelectArticle={setSelectedArticle}
+        onSelectArticle={handleOpenArticlePage}
         onSelectCompetition={setSelectedCompetition}
       />
 

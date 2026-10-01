@@ -47,7 +47,8 @@ export type NavPage =
   | 'galerie'
   | 'contact'
   | 'admin'
-  | 'membre';
+  | 'membre'
+  | 'article';
 
 /** Sous-onglets institutionnels de la page « LA FIMF » */
 export type FimfSubTab =

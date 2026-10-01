@@ -208,30 +208,30 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
               </span>
             </div>
 
-            {/* Teams Confrontation */}
-            <div className="flex-1 w-full px-6 py-3.5 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+            {/* Teams Confrontation — grille 1 ligne (jamais empilée) */}
+            <div className="flex-1 w-full px-4 sm:px-6 py-3.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
               <button
                 onClick={() => homeClub && onSelectClub(homeClub)}
-                className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+                className="flex items-center justify-end sm:justify-start gap-2 min-w-0 hover:opacity-80 transition-opacity"
               >
                 <ClubBadge id={nextMatch.homeTeamId} size="md" />
-                <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight uppercase">
+                <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight uppercase truncate">
                   {homeClub?.name}
                 </span>
               </button>
 
-              <span className="text-xs font-black text-[#ea580c] px-2 py-0.5 rounded bg-orange-50">
+              <span className="text-xs font-black text-[#ea580c] px-2 py-0.5 rounded bg-orange-50 shrink-0">
                 VS
               </span>
 
               <button
                 onClick={() => awayClub && onSelectClub(awayClub)}
-                className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+                className="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity"
               >
-                <ClubBadge id={nextMatch.awayTeamId} size="md" />
-                <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight uppercase">
+                <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight uppercase truncate">
                   {awayClub?.name}
                 </span>
+                <ClubBadge id={nextMatch.awayTeamId} size="md" />
               </button>
             </div>
 

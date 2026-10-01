@@ -1,0 +1,6 @@
+{
+  "name": "FIMF - Fédération Ivoirienne de Mini Football",
+  "description": "Portail officiel de la Fédération Ivoirienne de Mini Football (FIMF), fondée en janvier 2017 : championnat national 2026 (12 équipes, Temple du Foot de l'Université — Abidjan), CAN Guinée 2027, Ligue des Champions Africaine AMC, actualités, classements, clubs et compétitions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

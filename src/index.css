@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+@layer base {
+  /* Pas de scrollbar horizontale sur le site ni dans l'admin :
+     on coupe tout débordement large (menus, tables, décos absolues).
+     « clip » ne crée pas de conteneur de scroll → position: sticky reste OK.
+     #root : ceinture de sécurité supplémentaire (page Calendrier, carrousels…). */
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, .font-heading {
+    letter-spacing: -0.02em;
+  }
+}
+
+.font-teko {
+  font-family: 'Teko', sans-serif;
+}
+
+/* ───────────────────────────────────────────────
+   Animations des menus déroulants (fade + slide)
+   ─────────────────────────────────────────────── */
+
+@keyframes fimf-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fimf-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fimf-accordion-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Panneau du dropdown / mega-menu */
+.animate-dropdown-in {
+  transform-origin: top center;
+  animation: fimf-dropdown-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Apparition décalée des items du menu */
+.fimf-stagger > * {
+  animation: fimf-item-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.fimf-stagger > *:nth-child(1) { animation-delay: 30ms; }
+.fimf-stagger > *:nth-child(2) { animation-delay: 55ms; }
+.fimf-stagger > *:nth-child(3) { animation-delay: 80ms; }
+.fimf-stagger > *:nth-child(4) { animation-delay: 105ms; }
+.fimf-stagger > *:nth-child(5) { animation-delay: 130ms; }
+.fimf-stagger > *:nth-child(6) { animation-delay: 155ms; }
+.fimf-stagger > *:nth-child(7) { animation-delay: 180ms; }
+.fimf-stagger > *:nth-child(8) { animation-delay: 205ms; }
+.fimf-stagger > *:nth-child(9) { animation-delay: 230ms; }
+.fimf-stagger > *:nth-child(10) { animation-delay: 255ms; }
+.fimf-stagger > *:nth-child(11) { animation-delay: 280ms; }
+.fimf-stagger > *:nth-child(12) { animation-delay: 305ms; }
+
+/* Contenu d'accordéon (mobile) */
+.animate-accordion-in {
+  animation: fimf-accordion-in 0.2s ease-out both;
+}
+
+/* ───────────────────────────────────────────────
+   Animations des modales et overlays
+   ─────────────────────────────────────────────── */
+
+@keyframes fimf-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fimf-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fimf-lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fimf-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Overlay assombri des modales */
+.animate-overlay-in {
+  animation: fimf-fade-in 0.15s ease-out both;
+}
+
+/* Fondu simple (bandeaux de confirmation, blocs de succès…) */
+.animate-fade-in {
+  animation: fimf-fade-in 0.25s ease-out both;
+}
+
+/* Panneau central des modales */
+.animate-modal-in {
+  animation: fimf-modal-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Image de la lightbox galerie */
+.animate-lightbox-in {
+  animation: fimf-lightbox-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Toast de notification flottant */
+.animate-toast-in {
+  animation: fimf-toast-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ───────────────────────────────────────────────
+   Bouton « Retour en haut de page »
+   ─────────────────────────────────────────────── */
+
+@keyframes fimf-backtotop-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fimf-backtotop-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.85);
+  }
+}
+
+/* Apparition au-delà du seuil de scroll */
+.animate-backtotop-in {
+  animation: fimf-backtotop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Disparition au retour en haut */
+.animate-backtotop-out {
+  animation: fimf-backtotop-out 0.25s ease-in both;
+}
+
+/* Accessibilité : désactive les animations si l'utilisateur le préfère */
+@media (prefers-reduced-motion: reduce) {
+  .animate-dropdown-in,
+  .fimf-stagger > *,
+  .animate-accordion-in,
+  .animate-overlay-in,
+  .animate-fade-in,
+  .animate-modal-in,
+  .animate-lightbox-in,
+  .animate-toast-in,
+  .animate-backtotop-in,
+  .animate-backtotop-out {
+    animation: none;
+  }
+}

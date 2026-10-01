@@ -1,0 +1,254 @@
+import React, { useState } from 'react';
+import { NewsArticle } from '@/src/data/fimfData';
+import { X, Calendar, User, Clock, Share2, Tag, Check, Copy } from 'lucide-react';
+
+interface ArticleReaderModalProps {
+  article: NewsArticle | null;
+  onClose: () => void;
+}
+
+export const ArticleReaderModal: React.FC<ArticleReaderModalProps> = ({
+  article,
+  onClose,
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  if (!article) return null;
+
+  const articleUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareText = `${article.title} - Fédération Ivoirienne de Mini-Football (FIMF)`;
+
+  const handleShareFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(articleUrl)}&quote=${encodeURIComponent(shareText)}`;
+    window.open(url, '_blank', 'noopener,noreferrer,width=600,height=500');
+  };
+
+  const handleShareTwitter = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(articleUrl)}&hashtags=FIMF,MiniFootball,CotedIvoire`;
+    window.open(url, '_blank', 'noopener,noreferrer,width=600,height=500');
+  };
+
+  const handleShareWhatsApp = () => {
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n${articleUrl}`)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(articleUrl);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Fallback
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-overlay-in">
+      <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-modal-in max-h-[92vh] flex flex-col">
+        {/* Close Button top-right */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/60 hover:bg-black text-white transition-colors cursor-pointer"
+          aria-label="Fermer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Scrollable Container */}
+        <div className="overflow-y-auto">
+          {/* Article Image Banner */}
+          <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-900">
+            <img
+              src={article.image}
+              alt={article.title}
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6 text-white">
+              <span className="inline-block px-2.5 py-1 bg-[#ea580c] text-white text-[11px] font-bold rounded uppercase mb-2">
+                {article.category}
+              </span>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black leading-tight text-white drop-shadow-sm">
+                {article.title}
+              </h1>
+            </div>
+          </div>
+
+          {/* Metadata bar */}
+          <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Calendar className="w-3.5 h-3.5 text-[#006039]" />
+                {article.dateStr}
+              </span>
+              <span className="flex items-center gap-1.5 font-medium">
+                <User className="w-3.5 h-3.5 text-[#006039]" />
+                {article.author}
+              </span>
+              <span className="flex items-center gap-1.5 text-slate-500">
+                <Clock className="w-3.5 h-3.5" />
+                {article.readTime}
+              </span>
+            </div>
+
+            {/* Quick Share action button in top bar */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handleShareWhatsApp}
+                title="Partager sur WhatsApp"
+                className="w-7 h-7 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+              >
+                <WhatsAppIcon className="w-3.5 h-3.5 fill-current" />
+              </button>
+              <button
+                onClick={handleShareFacebook}
+                title="Partager sur Facebook"
+                className="w-7 h-7 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+              >
+                <FacebookIcon className="w-3.5 h-3.5 fill-current" />
+              </button>
+              <button
+                onClick={handleShareTwitter}
+                title="Partager sur X (Twitter)"
+                className="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+              >
+                <TwitterXIcon className="w-3.5 h-3.5 fill-current" />
+              </button>
+            </div>
+          </div>
+
+          {/* Article Prose Body */}
+          <div className="p-6 sm:p-8 space-y-6 text-slate-800 text-sm sm:text-base leading-relaxed">
+            <p className="font-semibold text-slate-900 text-base sm:text-lg border-l-4 border-[#ea580c] pl-4 italic bg-orange-50/50 py-2.5 rounded-r">
+              {article.excerpt}
+            </p>
+
+            {article.content.map((paragraph, index) => (
+              <p key={index} className="text-slate-700">
+                {paragraph}
+              </p>
+            ))}
+
+            {/* Dedicated Social Media Share Card */}
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 text-slate-900 font-black text-xs sm:text-sm uppercase tracking-tight">
+                    <Share2 className="w-4 h-4 text-[#ea580c]" />
+                    <span>Partager cet article officiel FIMF</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Faites rayonner le Mini-Football ivoirien auprès de votre communauté
+                  </p>
+                </div>
+
+                {/* Social Buttons Group */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* WhatsApp */}
+                  <button
+                    onClick={handleShareWhatsApp}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-xs hover:shadow cursor-pointer select-none"
+                    aria-label="Partager sur WhatsApp"
+                  >
+                    <WhatsAppIcon className="w-4 h-4 fill-current" />
+                    <span>WhatsApp</span>
+                  </button>
+
+                  {/* Facebook */}
+                  <button
+                    onClick={handleShareFacebook}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#1877F2] hover:bg-[#1466d3] text-white text-xs font-bold transition-all shadow-xs hover:shadow cursor-pointer select-none"
+                    aria-label="Partager sur Facebook"
+                  >
+                    <FacebookIcon className="w-4 h-4 fill-current" />
+                    <span>Facebook</span>
+                  </button>
+
+                  {/* Twitter / X */}
+                  <button
+                    onClick={handleShareTwitter}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs hover:shadow cursor-pointer select-none"
+                    aria-label="Partager sur Twitter / X"
+                  >
+                    <TwitterXIcon className="w-3.5 h-3.5 fill-current" />
+                    <span>X (Twitter)</span>
+                  </button>
+
+                  {/* Copy Link */}
+                  <button
+                    onClick={handleCopyLink}
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                      copied
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                        : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                    }`}
+                    title="Copier le lien direct"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Copié !</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Copier</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className="pt-2 flex flex-wrap items-center gap-2">
+              <Tag className="w-3.5 h-3.5 text-slate-400" />
+              {article.tags.map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded-md transition-colors"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-4 bg-slate-100 border-t border-slate-200 flex justify-end shrink-0">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+          >
+            Fermer l'article
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// SVG Icons for Social Networks
+const WhatsAppIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.541 1.761.813 2.796.813 3.183 0 5.769-2.587 5.77-5.766.001-3.182-2.585-5.8-5.77-5.8zm3.393 8.305c-.149.42-1.077 1.139-1.42 1.196-.341.056-.632.062-2.122-.524-1.898-.747-3.08-2.698-3.174-2.823-.095-.125-.765-1.018-.765-1.942 0-.923.486-1.378.658-1.564.172-.187.376-.234.502-.234.125 0 .251.002.361.007.116.006.27-.044.423.324.156.376.533 1.298.579 1.393.047.094.079.204.016.329-.063.125-.094.204-.188.313-.094.11-.198.245-.283.329-.094.094-.192.196-.083.383.11.188.489.807 1.05 1.306.722.643 1.33.842 1.519.936.188.094.298.079.408-.047.11-.125.47-.549.596-.737.125-.188.251-.157.423-.094.173.063 1.099.518 1.287.612.188.094.313.141.36.22.047.078.047.454-.102.874zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.434 5.174L2 22l4.982-1.307C8.428 21.528 10.155 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2c-1.637 0-3.167-.47-4.462-1.282l-.32-.2-2.962.777.79-2.887-.208-.332C3.963 15.011 3.5 13.549 3.5 12c0-4.687 3.813-8.5 8.5-8.5s8.5 3.813 8.5 8.5-3.813 8.5-8.5 8.5z" />
+  </svg>
+);
+
+const FacebookIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+  </svg>
+);
+
+const TwitterXIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+

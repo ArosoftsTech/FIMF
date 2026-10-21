@@ -16,8 +16,11 @@ const CLUBS = [
   { id: 'sol-fc', email: 'solfc@fimf.ci' },
 ];
 
-// Mot de passe temporaire commun, à changer à la première connexion
-const TEMP_PASSWORD = '***REMOVED***';
+// Mot de passe temporaire commun aux comptes dirigeants créés.
+// Il ne doit JAMAIS être versionné : le fournir à l'exécution, puis le
+// changer à la première connexion de chaque dirigeant.
+//   CLUB_TEMP_PASSWORD='...' SBP=... SUPABASE_SECRET_KEY=... node supabase/create-club-users.mjs
+const TEMP_PASSWORD = process.env.CLUB_TEMP_PASSWORD;
 
 function slugToName(id) {
   return id
@@ -34,6 +37,11 @@ async function run() {
 
   if (!SECRET) {
     console.error('Variable SUPABASE_SECRET_KEY manquante (clé sb_secret_ du projet)');
+    process.exit(1);
+  }
+
+  if (!TEMP_PASSWORD) {
+    console.error('Variable CLUB_TEMP_PASSWORD manquante (mot de passe temporaire des dirigeants)');
     process.exit(1);
   }
 

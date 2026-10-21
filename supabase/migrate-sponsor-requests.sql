@@ -17,14 +17,25 @@ create table if not exists public.sponsor_requests (
 
 alter table public.sponsor_requests enable row level security;
 
--- Formulaire public : insertion autorisée pour tous
+-- Formulaire public : insertion autorisée pour tous, statut imposé
 drop policy if exists "anyone can submit sponsor request" on public.sponsor_requests;
 create policy "anyone can submit sponsor request"
   on public.sponsor_requests for insert
-  to anon, authenticated with check (true);
+  to anon, authenticated with check (status = 'nouvelle');
 
--- Lecture réservée aux utilisateurs authentifiés (console admin)
+-- Lecture/traitement réservés aux admins fédéraux (données personnelles :
+-- email et téléphone du contact — jamais exposés aux comptes membres)
 drop policy if exists "admins read sponsor requests" on public.sponsor_requests;
 create policy "admins read sponsor requests"
   on public.sponsor_requests for select
-  to authenticated using (true);
+  to authenticated using (public.is_fimf_admin());
+
+drop policy if exists "admins update sponsor requests" on public.sponsor_requests;
+create policy "admins update sponsor requests"
+  on public.sponsor_requests for update
+  to authenticated using (public.is_fimf_admin()) with check (public.is_fimf_admin());
+
+drop policy if exists "admins delete sponsor requests" on public.sponsor_requests;
+create policy "admins delete sponsor requests"
+  on public.sponsor_requests for delete
+  to authenticated using (public.is_fimf_admin());

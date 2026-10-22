@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Club, CLUBS_DATA, Match, MATCHES_DATA } from '@/src/data/fimfData';
 import { ClubBadge } from '../ClubBadge';
+import { MatchSkeleton } from '../anim/Skeleton';
 import {
   fetchGamePeriods,
   fetchGamePrizes,
@@ -178,8 +179,9 @@ export const MemberGamesSection: React.FC<MemberGamesSectionProps> = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-7 h-7 text-emerald-600 animate-spin" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Chargement des pronostics">
+        <MatchSkeleton />
+        <MatchSkeleton />
       </div>
     );
   }

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { NEWS_DATA, NewsArticle } from '@/src/data/fimfData';
 import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { ArrowRight, Calendar, Tag, Clock } from 'lucide-react';
+import { Stagger, StaggerItem } from '../anim/Reveal';
 
 interface ActualitesViewProps {
   onSelectArticle: (article: NewsArticle) => void;
@@ -63,13 +65,21 @@ export const ActualitesView: React.FC<ActualitesViewProps> = ({ onSelectArticle 
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
+                className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
                   isActive
-                    ? 'bg-[#ea580c] text-white shadow-xs'
+                    ? 'text-white'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                {cat}
+                {isActive && (
+                  <motion.span
+                    layoutId="actus-category"
+                    className="absolute inset-0 bg-[#ea580c] rounded-lg shadow-xs"
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="relative">{cat}</span>
               </button>
             );
           })}
@@ -78,12 +88,12 @@ export const ActualitesView: React.FC<ActualitesViewProps> = ({ onSelectArticle 
 
       {/* 3. NEWS GRID (matching screenshot 7) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.map((article) => (
+        <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredArticles.map((article, i) => (
+            <StaggerItem key={article.id} index={i}>
             <div
-              key={article.id}
               onClick={() => onSelectArticle(article)}
-              className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between cursor-pointer group"
+              className="fimf-card-lift bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md overflow-hidden flex flex-col justify-between cursor-pointer group h-full"
             >
               <div>
                 <div className="relative h-48 w-full overflow-hidden bg-slate-900">
@@ -130,8 +140,9 @@ export const ActualitesView: React.FC<ActualitesViewProps> = ({ onSelectArticle 
                 </span>
               </div>
             </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </section>
     </div>
   );

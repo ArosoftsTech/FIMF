@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FimfLogo } from './FimfLogo';
 import { useAuth } from '../context/AuthContext';
+import { useScrolled, ANIM } from '@/src/lib/anim';
 import {
   Search,
   UserCheck,
@@ -184,6 +185,23 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openMobileAccordion, setOpenMobileAccordion] = useState<string | null>(null);
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Header compact au scroll (hauteur fixe → pas de CLS, seul le logo rétrécit).
+  const scrolled = useScrolled(8);
+
+  // Drawer mobile : fermeture via Échap + blocage du scroll de la page.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mobileMenuOpen]);
 
   // Ferme le dropdown actif quand la page change
   useEffect(() => {
@@ -237,7 +255,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasActiveChild = (item: TopItem) => item.page === currentPage;
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-xs">
+    <header
+      className={`fimf-header sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-slate-200/80 ${
+        scrolled ? 'fimf-header--scrolled shadow-md' : 'shadow-xs'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Zone 1: Brand Logo */}
@@ -246,7 +268,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ea580c] rounded-lg p-1 transition-transform active:scale-98"
             aria-label="FIMF Accueil"
           >
-            <FimfLogo variant="dark" size="md" />
+            <span className="fimf-header-logo inline-flex">
+              <FimfLogo variant="dark" size="md" />
+            </span>
           </button>
 
           {/* Zone 2: Navigation Links (Desktop) */}
@@ -261,17 +285,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     key={item.id}
                     onClick={() => item.page && handleNavClick(item.page)}
-                    className={`relative h-full flex items-center px-2.5 2xl:px-4 text-[11px] 2xl:text-xs tracking-wider font-bold transition-colors cursor-pointer select-none whitespace-nowrap focus-visible:outline-none ${
-                      active ? 'text-[#ea580c]' : 'text-slate-700 hover:text-[#006039]'
+                    className={`fimf-nav-link relative h-full flex items-center px-2.5 2xl:px-4 text-[11px] 2xl:text-xs tracking-wider font-bold transition-colors cursor-pointer select-none whitespace-nowrap focus-visible:outline-none ${
+                      active ? 'fimf-nav-link--active text-[#ea580c]' : 'text-slate-700 hover:text-[#006039]'
                     }`}
                   >
                     {item.label}
-                    {active && (
-                      <span
-                        className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#ea580c] rounded-t-sm"
-                        aria-hidden="true"
-                      />
-                    )}
                   </button>
                 );
               }
@@ -287,20 +305,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => (item.page ? handleNavClick(item.page) : openMenu(item.id))}
                     aria-expanded={isOpen}
                     aria-haspopup="true"
-                    className={`relative h-full flex items-center gap-1 px-2.5 2xl:px-4 text-[11px] 2xl:text-xs tracking-wider font-bold transition-colors cursor-pointer select-none whitespace-nowrap focus-visible:outline-none ${
-                      active ? 'text-[#ea580c]' : 'text-slate-700 hover:text-[#006039]'
+                    className={`fimf-nav-link relative h-full flex items-center gap-1 px-2.5 2xl:px-4 text-[11px] 2xl:text-xs tracking-wider font-bold transition-colors cursor-pointer select-none whitespace-nowrap focus-visible:outline-none ${
+                      active ? 'fimf-nav-link--active text-[#ea580c]' : 'text-slate-700 hover:text-[#006039]'
                     }`}
                   >
                     {item.label}
                     <ChevronDown
                       className={`w-3 h-3 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#ea580c]' : 'text-slate-400'}`}
                     />
-                    {active && (
-                      <span
-                        className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#ea580c] rounded-t-sm"
-                        aria-hidden="true"
-                      />
-                    )}
                   </button>                  {/* Dropdown / Mega-menu */}
                   {isOpen && (
                     <div
@@ -379,7 +391,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Bell className="w-4 h-4" />
                 {unreadNotifsCount > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#ea580c] text-white text-[9.5px] font-black flex items-center justify-center ring-2 ring-white">
+                  <span className="fimf-notif-pulse absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#ea580c] text-white text-[9.5px] font-black flex items-center justify-center ring-2 ring-white">
                     {unreadNotifsCount > 9 ? '9+' : unreadNotifsCount}
                   </span>
                 )}
@@ -399,7 +411,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={onOpenSponsoring}
-              className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] active:bg-[#c2410c] rounded-md shadow-xs hover:shadow transition-all duration-150 uppercase tracking-wide cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#ea580c]"
+              className="fimf-btn-lift inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] active:bg-[#c2410c] rounded-md shadow-xs hover:shadow transition-all duration-150 uppercase tracking-wide cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#ea580c]"
               title="Devenir partenaire ou sponsor de la FIMF"
             >
               <Handshake className="w-3.5 h-3.5" />
@@ -410,7 +422,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {user ? (
               <button
                 onClick={onOpenMemberArea}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black text-white bg-[#004724] hover:bg-[#006039] rounded-md shadow-xs transition-colors uppercase tracking-wider cursor-pointer border border-emerald-800"
+                className="fimf-btn-lift inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black text-white bg-[#004724] hover:bg-[#006039] rounded-md shadow-xs transition-colors uppercase tracking-wider cursor-pointer border border-emerald-800"
                 title="Mon espace membre"
               >
                 <UserRound className="w-3.5 h-3.5" />
@@ -419,7 +431,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 rounded-md shadow-xs transition-colors uppercase tracking-wider cursor-pointer border border-slate-700"
+                className="fimf-btn-lift inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 rounded-md shadow-xs transition-colors uppercase tracking-wider cursor-pointer border border-slate-700"
                 title="Se connecter ou devenir membre de la FIMF"
               >
                 <UserCheck className="w-3.5 h-3.5" />
@@ -439,99 +451,120 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Menu mobile : panneau latéral depuis la droite + overlay en fondu.
+          Fermeture : overlay, bouton, Échap. Scroll bloqué quand ouvert. */}
       {mobileMenuOpen && (
-        <div className="xl:hidden border-t border-slate-200 bg-white shadow-lg animate-dropdown-in">
-          <div className="px-4 pt-3 pb-6 space-y-1 max-h-[calc(100vh-5rem)] overflow-y-auto">
-            {[...NAV_TOP_ITEMS, ...NAV_MOBILE_ONLY_ITEMS].map((item) => {
-              const active = hasActiveChild(item);
-              const accordionOpen = openMobileAccordion === item.id;
-
-              if (!item.children) {
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => item.page && handleNavClick(item.page)}
-                    className={`w-full text-left px-3 py-2.5 rounded-md text-sm font-bold tracking-wide flex items-center justify-between transition-colors ${
-                      active ? 'bg-orange-50 text-[#ea580c]' : 'text-slate-800 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>{item.label}</span>
-                    {active && <span className="w-2 h-2 rounded-full bg-[#ea580c]" />}
-                  </button>
-                );
-              }
-
-              return (
-                <div key={item.id}>
-                  <button
-                    onClick={() => setOpenMobileAccordion(accordionOpen ? null : item.id)}
-                    aria-expanded={accordionOpen}
-                    className={`w-full text-left px-3 py-2.5 rounded-md text-sm font-bold tracking-wide flex items-center justify-between transition-colors ${
-                      active ? 'bg-orange-50 text-[#ea580c]' : 'text-slate-800 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span>{item.label}</span>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        accordionOpen ? 'rotate-180 text-[#ea580c]' : 'text-slate-400'
-                      }`}
-                    />
-                  </button>
-
-                  {accordionOpen && (
-                    <div className="mt-1 mb-2 ml-3 pl-3 border-l-2 border-slate-200 space-y-0.5 animate-accordion-in">
-                      {item.children.map((child) => (
-                        <button
-                          key={child.label}
-                          onClick={() => handleNavigateTo(child.target)}
-                          className="w-full text-left px-3 py-2 rounded-md text-xs font-semibold text-slate-600 hover:bg-orange-50 hover:text-[#ea580c] transition-colors flex items-center gap-2"
-                        >
-                          {child.icon && <span className="text-[#006039]">{child.icon}</span>}
-                          <span>{child.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Actions Sponsoring + Connexion (remplacent Espace Club / Admin) */}
-            <div className="pt-3 mt-2 border-t border-slate-200 grid grid-cols-2 gap-2">
+        <div className="xl:hidden fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Menu principal">
+          <div
+            className="fimf-drawer-overlay absolute inset-0 bg-slate-950/60"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="fimf-drawer absolute top-0 right-0 bottom-0 w-[min(340px,85vw)] bg-white shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+              <FimfLogo variant="dark" size="md" />
               <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenSponsoring();
-                }}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] rounded-md uppercase tracking-wide cursor-pointer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 text-slate-600 hover:text-slate-950 rounded-lg hover:bg-slate-100 transition-colors"
+                aria-label="Fermer le menu"
+                autoFocus
               >
-                <Handshake className="w-3.5 h-3.5" />
-                SPONSORING
+                <X className="w-6 h-6" />
               </button>
-              {user ? (
+            </div>
+            <div className="px-4 pt-3 pb-6 space-y-1 overflow-y-auto flex-1">
+              {[...NAV_TOP_ITEMS, ...NAV_MOBILE_ONLY_ITEMS].map((item, i) => {
+                const active = hasActiveChild(item);
+                const accordionOpen = openMobileAccordion === item.id;
+                const cascadeStyle = { animationDelay: `${Math.min(i, 5) * ANIM.stagger}s` };
+
+                if (!item.children) {
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => item.page && handleNavClick(item.page)}
+                      style={cascadeStyle}
+                      className={`fimf-drawer-item w-full text-left px-3 py-2.5 rounded-md text-sm font-bold tracking-wide flex items-center justify-between transition-colors ${
+                        active ? 'bg-orange-50 text-[#ea580c]' : 'text-slate-800 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {active && <span className="w-2 h-2 rounded-full bg-[#ea580c]" />}
+                    </button>
+                  );
+                }
+
+                return (
+                  <div key={item.id} style={cascadeStyle} className="fimf-drawer-item">
+                    <button
+                      onClick={() => setOpenMobileAccordion(accordionOpen ? null : item.id)}
+                      aria-expanded={accordionOpen}
+                      className={`w-full text-left px-3 py-2.5 rounded-md text-sm font-bold tracking-wide flex items-center justify-between transition-colors ${
+                        active ? 'bg-orange-50 text-[#ea580c]' : 'text-slate-800 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          accordionOpen ? 'rotate-180 text-[#ea580c]' : 'text-slate-400'
+                        }`}
+                      />
+                    </button>
+
+                    {accordionOpen && (
+                      <div className="mt-1 mb-2 ml-3 pl-3 border-l-2 border-slate-200 space-y-0.5 animate-accordion-in">
+                        {item.children.map((child) => (
+                          <button
+                            key={child.label}
+                            onClick={() => handleNavigateTo(child.target)}
+                            className="w-full text-left px-3 py-2 rounded-md text-xs font-semibold text-slate-600 hover:bg-orange-50 hover:text-[#ea580c] transition-colors flex items-center gap-2"
+                          >
+                            {child.icon && <span className="text-[#006039]">{child.icon}</span>}
+                            <span>{child.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Actions Sponsoring + Connexion (remplacent Espace Club / Admin) */}
+              <div className="pt-3 mt-2 border-t border-slate-200 grid grid-cols-2 gap-2">
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    onOpenMemberArea();
+                    onOpenSponsoring();
                   }}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-black text-white bg-[#004724] hover:bg-[#006039] rounded-md uppercase tracking-wider cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] rounded-md uppercase tracking-wide cursor-pointer"
                 >
-                  <UserRound className="w-3.5 h-3.5" />
-                  MON ESPACE
+                  <Handshake className="w-3.5 h-3.5" />
+                  SPONSORING
                 </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenAuth();
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 rounded-md uppercase tracking-wider cursor-pointer"
-                >
-                  <UserCheck className="w-3.5 h-3.5" />
-                  CONNEXION
-                </button>
-              )}
+                {user ? (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenMemberArea();
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-black text-white bg-[#004724] hover:bg-[#006039] rounded-md uppercase tracking-wider cursor-pointer"
+                  >
+                    <UserRound className="w-3.5 h-3.5" />
+                    MON ESPACE
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenAuth();
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 rounded-md uppercase tracking-wider cursor-pointer"
+                  >
+                    <UserCheck className="w-3.5 h-3.5" />
+                    CONNEXION
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

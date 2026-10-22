@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { CLUBS_DATA, TOP_SCORERS, TOP_ASSISTS, Club } from '@/src/data/fimfData';
 import { useFimfData } from '../../context/FimfDataContext';
 import { ClubBadge } from '../ClubBadge';
+import { Reveal } from '../anim/Reveal';
 import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { ChevronDown, Trophy, Target, Award, ArrowUpRight } from 'lucide-react';
 
@@ -64,13 +66,21 @@ export const ClassementView: React.FC<ClassementViewProps> = ({ onSelectClub }) 
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
+                  className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
                     isActive
-                      ? 'bg-[#ea580c] text-white shadow-xs'
+                      ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  {tab.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId="classement-tab"
+                      className="absolute inset-0 bg-[#ea580c] rounded-lg shadow-xs"
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="relative">{tab.label}</span>
                 </button>
               );
             })}
@@ -95,8 +105,15 @@ export const ClassementView: React.FC<ClassementViewProps> = ({ onSelectClub }) 
         </div>
       </section>
 
-      {/* 3. TABLE / LIST CONTENT */}
+      {/* 3. TABLE / LIST CONTENT — fondu + léger glissement à chaque onglet. */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal>
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
         {/* RANKINGS TABLES (General, Home, Away) */}
         {(activeTab === 'general' || activeTab === 'domicile' || activeTab === 'exterieur') && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
@@ -304,6 +321,8 @@ export const ClassementView: React.FC<ClassementViewProps> = ({ onSelectClub }) 
             </table>
           </div>
         )}
+        </motion.div>
+        </Reveal>
       </section>
     </div>
   );

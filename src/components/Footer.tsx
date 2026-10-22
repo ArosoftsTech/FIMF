@@ -2,6 +2,7 @@ import React from 'react';
 import { FimfLogo } from './FimfLogo';
 import { NavPage } from './Navbar';
 import { Facebook, Instagram, Youtube, Linkedin, ArrowUp } from 'lucide-react';
+import { Reveal } from './anim/Reveal';
 
 interface FooterProps {
   onNavigate: (page: NavPage) => void;
@@ -15,6 +16,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="bg-[#052818] text-white border-t border-emerald-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <Reveal>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-emerald-900/60">
           {/* Logo brand */}
           <button
@@ -101,8 +103,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </a>
           </div>
         </div>
+        </Reveal>
 
         {/* Bottom bar */}
+        <Reveal delay={0.1}>
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-emerald-300/70 gap-4">
           <div className="text-center sm:text-left space-y-0.5">
             <p>© 2026 FIMF — Fédération Ivoirienne de Mini Football. Tous droits réservés.</p>
@@ -129,6 +133,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </button>
           </div>
         </div>
+        </Reveal>
       </div>
     </footer>
   );

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CLUBS_DATA, Club } from '@/src/data/fimfData';
 import { useFimfData } from '../../context/FimfDataContext';
 import { ClubBadge } from '../ClubBadge';
+import { Stagger, StaggerItem } from '../anim/Reveal';
 import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { Search, ChevronDown, ArrowRight, MapPin, Users, Star } from 'lucide-react';
 
@@ -162,13 +163,13 @@ export const EquipesView: React.FC<EquipesViewProps> = ({
             Aucun club ne correspond à vos critères de recherche.
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {filteredClubs.map((club) => {
+          <Stagger className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {filteredClubs.map((club, i) => {
               const isFav = favoriteIds.includes(club.id);
               return (
+                <StaggerItem key={club.id} index={i}>
                 <div
-                  key={club.id}
-                  className="relative bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all p-5 flex flex-col items-center text-center justify-between group"
+                  className="fimf-card-lift relative bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md p-5 flex flex-col items-center text-center justify-between group h-full"
                 >
                   {/* Star toggle top-right */}
                   {onToggleFavorite && (
@@ -221,9 +222,10 @@ export const EquipesView: React.FC<EquipesViewProps> = ({
                     </button>
                   </div>
                 </div>
+                </StaggerItem>
               );
             })}
-          </div>
+          </Stagger>
         )}
       </section>
     </div>

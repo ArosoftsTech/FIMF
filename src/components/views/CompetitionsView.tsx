@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { COMPETITIONS_DATA, Competition } from '@/src/data/fimfData';
 import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { ArrowRight, Trophy, Users, Calendar, Award } from 'lucide-react';
+import { Stagger, StaggerItem } from '../anim/Reveal';
 
 interface CompetitionsViewProps {
   onSelectCompetition: (comp: Competition) => void;
@@ -83,13 +85,21 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
+                  className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
                     isActive
-                      ? 'bg-[#ea580c] text-white shadow-xs'
+                      ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  {cat}
+                  {isActive && (
+                    <motion.span
+                      layoutId="competitions-category"
+                      className="absolute inset-0 bg-[#ea580c] rounded-lg shadow-xs"
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="relative">{cat}</span>
                 </button>
               );
             })}
@@ -110,11 +120,11 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
 
       {/* 3. MAJOR COMPETITIONS CARDS (3 columns matching screenshot 5) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {majorComps.map((comp) => (
+        <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {majorComps.map((comp, i) => (
+            <StaggerItem key={comp.id} index={i}>
             <div
-              key={comp.id}
-              className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col hover:shadow-md transition-all group"
+              className="fimf-card-lift bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col hover:shadow-md group h-full"
             >
               <div className="relative h-48 w-full overflow-hidden bg-slate-900">
                 <img
@@ -141,7 +151,7 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
                 <div>
                   <button
                     onClick={() => onSelectCompetition(comp)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold rounded-lg transition-colors uppercase tracking-wider shadow-xs cursor-pointer"
+                    className="fimf-btn-lift w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold rounded-lg transition-colors uppercase tracking-wider shadow-xs cursor-pointer"
                   >
                     <span>DÉCOUVRIR</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -149,8 +159,9 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
                 </div>
               </div>
             </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       {/* 4. AUTRES COMPÉTITIONS SECTION (matching screenshot 5) */}
@@ -162,11 +173,11 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {otherComps.map((comp) => (
+          <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {otherComps.map((comp, i) => (
+              <StaggerItem key={comp.id} index={i}>
               <div
-                key={comp.id}
-                className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden flex items-center p-4 gap-4 hover:shadow transition-shadow group"
+                className="fimf-card-lift bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden flex items-center p-4 gap-4 hover:shadow-md group h-full"
               >
                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-900 shrink-0">
                   <img
@@ -186,15 +197,16 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
                   </p>
                   <button
                     onClick={() => onSelectCompetition(comp)}
-                    className="mt-2 text-[10px] font-bold text-[#ea580c] hover:text-[#c2410c] uppercase flex items-center gap-1 cursor-pointer"
+                    className="mt-2 text-[10px] font-bold text-[#ea580c] hover:text-[#c2410c] uppercase flex items-center gap-1 cursor-pointer group/btn"
                   >
                     <span>DÉCOUVRIR</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3 h-3 transition-transform group-hover/btn:translate-x-0.5" />
                   </button>
                 </div>
               </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </section>
       )}
     </div>

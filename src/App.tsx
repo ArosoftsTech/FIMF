@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import { ANIM } from './lib/anim';
 import { Navbar, NavPage, NavTarget } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { AccueilView } from './components/views/AccueilView';
@@ -261,8 +263,15 @@ function AppInner() {
         onSelectClub={setSelectedClub}
       />
 
-      {/* Main Page View Area */}
-      <main className="flex-1">
+      {/* Main Page View Area — fondu rapide entre les pages (250 ms),
+          sans sortie animée (pas d'écran blanc ni de décalage). */}
+      <motion.main
+        key={currentPage}
+        className="flex-1"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: ANIM.page, ease: 'easeOut' }}
+      >
         {currentPage === 'membre' && (
           authLoading ? (
             <div className="min-h-[60vh] flex items-center justify-center">
@@ -375,7 +384,7 @@ function AppInner() {
             onOpenArticle={handleOpenArticlePage}
           />
         )}
-      </main>
+      </motion.main>
 
       {/* Footer */}
       <Footer onNavigate={handleNavigate} />

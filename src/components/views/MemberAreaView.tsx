@@ -241,15 +241,15 @@ export const MemberAreaView: React.FC<MemberAreaViewProps> = ({
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          {home && <ClubBadge id={home.id} size="md" />}
-                          <span className="text-sm font-black truncate">{home?.name ?? nextFollowedMatch.m.homeTeamId}</span>
-                        </div>
-                        <span className="text-[10px] font-black text-emerald-400 shrink-0">VS</span>
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
                         <div className="flex items-center gap-2.5 min-w-0 justify-end">
-                          <span className="text-sm font-black truncate text-right">{away?.name ?? nextFollowedMatch.m.awayTeamId}</span>
+                          <span className="text-sm font-black truncate text-right" title={home?.name}>{home?.name ?? nextFollowedMatch.m.homeTeamId}</span>
+                          {home && <ClubBadge id={home.id} size="md" />}
+                        </div>
+                        <span className="text-[10px] font-black text-emerald-400 shrink-0 px-1">VS</span>
+                        <div className="flex items-center gap-2.5 min-w-0">
                           {away && <ClubBadge id={away.id} size="md" />}
+                          <span className="text-sm font-black truncate" title={away?.name}>{away?.name ?? nextFollowedMatch.m.awayTeamId}</span>
                         </div>
                       </div>
                       <div className="mt-3 pt-3 border-t border-emerald-800/70 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -461,15 +461,16 @@ export const MemberAreaView: React.FC<MemberAreaViewProps> = ({
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
                   {m.dateStr} • {m.timeStr}
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
+                {/* Confrontation en grille stricte 1fr / auto / 1fr : le « VS » reste centré */}
+                <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+                  <div className="flex items-center justify-end gap-2 min-w-0">
+                    <span className="text-xs font-bold text-slate-900 truncate text-right" title={home?.name}>{home?.name}</span>
                     {home && <ClubBadge id={home.id} size="sm" />}
-                    <span className="text-xs font-bold text-slate-900 truncate">{home?.name}</span>
                   </div>
-                  <span className="text-xs font-black text-slate-400">VS</span>
-                  <div className="flex items-center gap-2 min-w-0 justify-end">
-                    <span className="text-xs font-bold text-slate-900 truncate text-right">{away?.name}</span>
+                  <span className="text-xs font-black text-slate-400 px-2">VS</span>
+                  <div className="flex items-center gap-2 min-w-0">
                     {away && <ClubBadge id={away.id} size="sm" />}
+                    <span className="text-xs font-bold text-slate-900 truncate" title={away?.name}>{away?.name}</span>
                   </div>
                 </div>
                 <div className="text-[10px] text-slate-500 mt-2 truncate">📍 {m.venue}</div>

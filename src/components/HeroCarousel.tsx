@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { HeroSlide } from '@/src/data/fimfData';
 import { mediaUrl } from '../lib/fimfApi';
 import type { NavPage } from './Navbar';
+import { ANIM, useMouseParallax, useScrollParallax } from '@/src/lib/anim';
 import {
   Calendar,
   ArrowRight,
@@ -14,8 +15,8 @@ interface HeroCarouselProps {
   onNavigate: (page: NavPage) => void;
 }
 
-/** Durée d'affichage d'une slide (ms) */
-const SLIDE_INTERVAL = 6000;
+/** Durée d'affichage d'une slide — pilotée par ANIM.heroAutoplay (src/lib/anim.ts). */
+const SLIDE_INTERVAL = ANIM.heroAutoplay;
 
 /**
  * Carrousel de la section hero (page d'accueil).
@@ -52,6 +53,17 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, onNavigate }
     if (index >= count) setIndex(0);
   }, [count, index]);
 
+  // Parallaxe : scroll sur les fonds + souris sur le contenu (desktop uniquement,
+  // inactifs en reduced-motion / tactile — voir useScrollParallax/useMouseParallax).
+  const { targetRef: bgParallaxRef, zoneRef: heroZoneRef } = useScrollParallax(0.06);
+  const contentParallaxRef = useMouseParallax<HTMLDivElement>(10);
+
+  // Flèches du clavier quand le carrousel a le focus.
+  const onHeroKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight') goNext();
+    else if (e.key === 'ArrowLeft') goPrev();
+  };
+
   if (count === 0) return null;
 
   const slide = slides[Math.min(index, count - 1)];
@@ -62,13 +74,18 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, onNavigate }
 
   return (
     <section
+      ref={heroZoneRef}
       className="relative overflow-hidden bg-slate-900 min-h-[460px] md:min-h-[520px] lg:min-h-[560px] flex items-center"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onKeyDown={onHeroKeyDown}
+      tabIndex={0}
       aria-roledescription="carrousel"
-      aria-label="À la une de la FIMF"
+      aria-label="À la une de la FIMF — utilisez les flèches gauche et droite pour naviguer"
     >
-      {/* Fonds des slides : empilés, opacité animée = fondu enchaîné */}
+      {/* Fonds des slides : empilés, opacité animée = fondu enchaîné.
+          Couche parallaxe au scroll (transform 3D, desktop uniquement). */}
+      <div ref={bgParallaxRef} className="absolute inset-0 will-change-transform">
       {slides.map((s, i) => (
         <div
           key={s.id}
@@ -80,7 +97,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, onNavigate }
           <img
             src={mediaUrl(s.image)}
             alt={s.title}
-            className={`w-full h-full object-cover object-center scale-102 transition-transform duration-[7000ms] ease-out ${
+            className={`fimf-hero-kenburns w-full h-full object-cover object-center scale-102 transition-transform duration-[7000ms] ease-out ${
               i === index ? 'scale-110' : 'scale-102'
             }`}
             referrerPolicy="no-referrer"
@@ -90,20 +107,31 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, onNavigate }
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         </div>
       ))}
+      </div>
 
-      {/* Contenu de la slide active */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-white w-full">
-        <div key={slide.id} className="max-w-2xl space-y-4 animate-fade-in">
+      {/* Contenu de la slide active : titre ligne par ligne (masque + glissement),
+          puis sous-titre, puis boutons en cascade (stagger 100 ms). */}
+      <div ref={contentParallaxRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-white w-full will-change-transform">
+        <div key={slide.id} className="max-w-2xl space-y-4">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-none text-balance">
-            <span>{slide.title} </span>
-            <span className="text-[#f97316] drop-shadow-md">{slide.highlight}</span>
+            <span className="fimf-hero-mask">
+              <span className="fimf-hero-line">{slide.title}</span>
+            </span>
+            <span className="fimf-hero-mask">
+              <span className="fimf-hero-line text-[#f97316] drop-shadow-md" style={{ animationDelay: `${ANIM.heroStep}s` }}>
+                {slide.highlight}
+              </span>
+            </span>
           </h1>
 
-          <p className="text-sm sm:text-base md:text-lg text-slate-200 font-medium leading-relaxed max-w-xl">
+          <p
+            className="fimf-hero-fade text-sm sm:text-base md:text-lg text-slate-200 font-medium leading-relaxed max-w-xl"
+            style={{ animationDelay: `${ANIM.heroStep * 2}s` }}
+          >
             {slide.subtitle}
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-4">
+          <div className="fimf-hero-fade flex flex-wrap items-center gap-3 sm:gap-4 pt-4" style={{ animationDelay: `${ANIM.heroStep * 3}s` }}>
             {slide.ctaLabel && (
               <button
                 onClick={() => handleCta(slide.ctaPage)}

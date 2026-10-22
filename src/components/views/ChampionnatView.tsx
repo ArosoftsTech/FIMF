@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { MATCHES_DATA, CLUBS_DATA, Match, Club } from '@/src/data/fimfData';
 import { ClubBadge } from '../ClubBadge';
+import { MatchRow } from '../MatchRow';
 import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import trophyImg from '@/src/assets/images/championship_trophy_gold_1790335980246.jpg';
 import {
@@ -101,13 +103,22 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setSubTab(tab.id)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
+                  className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
                     isActive
-                      ? 'bg-[#ea580c] text-white shadow-xs'
+                      ? 'text-white'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  {tab.label}
+                  {/* Indicateur actif qui glisse d'un onglet à l'autre. */}
+                  {isActive && (
+                    <motion.span
+                      layoutId="championnat-subtab"
+                      className="absolute inset-0 bg-[#ea580c] rounded-lg shadow-xs"
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="relative">{tab.label}</span>
                 </button>
               );
             })}
@@ -132,8 +143,14 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
         </div>
       </section>
 
-      {/* 3. SUBTAB CONTENT */}
+      {/* 3. SUBTAB CONTENT — fondu + léger glissement à chaque changement. */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          key={subTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
         {/* CALENDRIER VIEW (exact layout as screenshot 3) */}
         {subTab === 'calendrier' && (
           <div className="space-y-8">
@@ -154,148 +171,24 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
             </div>
 
             {/* JOURNÉE 3 */}
-            <div className="space-y-3">
-              <div className="bg-slate-100 px-4 py-2 rounded-lg border-l-4 border-[#006039] flex items-center justify-between">
-                <span className="font-black text-xs sm:text-sm text-slate-800 uppercase tracking-wider">
-                  JOURNÉE 3
-                </span>
-                <span className="text-[11px] font-semibold text-slate-500">Phase Aller</span>
-              </div>
-
-              <div className="bg-white rounded-xl border border-slate-200 shadow-2xs divide-y divide-slate-100 overflow-hidden">
-                {journee3Matches.map((match) => {
-                  const home = CLUBS_DATA.find((c) => c.id === match.homeTeamId);
-                  const away = CLUBS_DATA.find((c) => c.id === match.awayTeamId);
-
-                  return (
-                    <div
-                      key={match.id}
-                      className="p-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-slate-50 transition-colors"
-                    >
-                      {/* Date & Time */}
-                      <div className="text-center md:text-left min-w-[150px]">
-                        <p className="text-xs font-bold text-slate-900">{match.dateStr}</p>
-                        <p className="text-[11px] font-medium text-slate-500">{match.timeStr}</p>
-                      </div>
-
-                      {/* Opponents Confrontation */}
-                      <div className="flex-1 flex items-center justify-center gap-4 sm:gap-6 w-full max-w-md">
-                        <button
-                          onClick={() => home && onSelectClub(home)}
-                          className="flex items-center gap-2.5 flex-1 justify-end group text-right"
-                        >
-                          <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#006039] transition-colors">
-                            {home?.name}
-                          </span>
-                          <ClubBadge id={match.homeTeamId} size="sm" />
-                        </button>
-
-                        <span className="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-black text-slate-600 shrink-0 uppercase">
-                          VS
-                        </span>
-
-                        <button
-                          onClick={() => away && onSelectClub(away)}
-                          className="flex items-center gap-2.5 flex-1 justify-start group text-left"
-                        >
-                          <ClubBadge id={match.awayTeamId} size="sm" />
-                          <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#006039] transition-colors">
-                            {away?.name}
-                          </span>
-                        </button>
-                      </div>
-
-                      {/* Venue & Link */}
-                      <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
-                        <div className="text-right hidden sm:block">
-                          <p className="text-xs font-semibold text-slate-700">{match.venue}</p>
-                        </div>
-
-                        <button
-                          onClick={() => onSelectMatch(match)}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ea580c] hover:text-[#c2410c] uppercase cursor-pointer"
-                        >
-                          <span>Détails</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <JourneeSection
+              title="JOURNÉE 3"
+              phase="Phase Aller"
+              accentClass="border-[#006039]"
+              matches={journee3Matches}
+              onSelectMatch={onSelectMatch}
+              onSelectClub={onSelectClub}
+            />
 
             {/* JOURNÉE 4 */}
-            <div className="space-y-3 pt-4">
-              <div className="bg-slate-100 px-4 py-2 rounded-lg border-l-4 border-[#ea580c] flex items-center justify-between">
-                <span className="font-black text-xs sm:text-sm text-slate-800 uppercase tracking-wider">
-                  JOURNÉE 4
-                </span>
-                <span className="text-[11px] font-semibold text-slate-500">Phase Aller</span>
-              </div>
-
-              <div className="bg-white rounded-xl border border-slate-200 shadow-2xs divide-y divide-slate-100 overflow-hidden">
-                {journee4Matches.map((match) => {
-                  const home = CLUBS_DATA.find((c) => c.id === match.homeTeamId);
-                  const away = CLUBS_DATA.find((c) => c.id === match.awayTeamId);
-
-                  return (
-                    <div
-                      key={match.id}
-                      className="p-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-slate-50 transition-colors"
-                    >
-                      {/* Date & Time */}
-                      <div className="text-center md:text-left min-w-[150px]">
-                        <p className="text-xs font-bold text-slate-900">{match.dateStr}</p>
-                        <p className="text-[11px] font-medium text-slate-500">{match.timeStr}</p>
-                      </div>
-
-                      {/* Opponents Confrontation */}
-                      <div className="flex-1 flex items-center justify-center gap-4 sm:gap-6 w-full max-w-md">
-                        <button
-                          onClick={() => home && onSelectClub(home)}
-                          className="flex items-center gap-2.5 flex-1 justify-end group text-right"
-                        >
-                          <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#006039] transition-colors">
-                            {home?.name}
-                          </span>
-                          <ClubBadge id={match.homeTeamId} size="sm" />
-                        </button>
-
-                        <span className="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-black text-slate-600 shrink-0 uppercase">
-                          VS
-                        </span>
-
-                        <button
-                          onClick={() => away && onSelectClub(away)}
-                          className="flex items-center gap-2.5 flex-1 justify-start group text-left"
-                        >
-                          <ClubBadge id={match.awayTeamId} size="sm" />
-                          <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#006039] transition-colors">
-                            {away?.name}
-                          </span>
-                        </button>
-                      </div>
-
-                      {/* Venue & Link */}
-                      <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
-                        <div className="text-right hidden sm:block">
-                          <p className="text-xs font-semibold text-slate-700">{match.venue}</p>
-                        </div>
-
-                        <button
-                          onClick={() => onSelectMatch(match)}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ea580c] hover:text-[#c2410c] uppercase cursor-pointer"
-                        >
-                          <span>Détails</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <JourneeSection
+              title="JOURNÉE 4"
+              phase="Phase Aller"
+              accentClass="border-[#ea580c]"
+              matches={journee4Matches}
+              onSelectMatch={onSelectMatch}
+              onSelectClub={onSelectClub}
+            />
           </div>
         )}
 
@@ -492,23 +385,24 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
                   <div
                     key={m.id}
                     onClick={() => onSelectMatch(m)}
-                    className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs hover:shadow transition-shadow cursor-pointer space-y-3"
+                    className="fimf-card-lift p-4 bg-white rounded-xl border border-slate-200 shadow-2xs hover:shadow-md cursor-pointer space-y-3"
                   >
                     <div className="flex items-center justify-between text-[11px] text-slate-500">
                       <span>{m.dateStr}</span>
                       <span className="font-semibold text-emerald-800">{m.venue}</span>
                     </div>
-                    <div className="flex items-center justify-between font-bold text-slate-900 text-sm">
-                      <div className="flex items-center gap-2">
+                    {/* Confrontation en grille stricte 1fr / auto / 1fr : le score reste centré */}
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 font-bold text-slate-900 text-sm">
+                      <div className="flex items-center justify-end gap-2 min-w-0">
+                        <span className="truncate text-right" title={home?.name}>{home?.shortName}</span>
                         <ClubBadge id={m.homeTeamId} size="sm" />
-                        <span>{home?.shortName}</span>
                       </div>
-                      <div className="px-3 py-1 bg-slate-100 rounded font-mono font-black text-base">
+                      <div className="px-3 py-1 bg-slate-100 rounded font-mono font-black text-base whitespace-nowrap">
                         {m.scoreHome} - {m.scoreAway}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span>{away?.shortName}</span>
+                      <div className="flex items-center gap-2 min-w-0">
                         <ClubBadge id={m.awayTeamId} size="sm" />
+                        <span className="truncate" title={away?.name}>{away?.shortName}</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -528,7 +422,7 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
               <div
                 key={club.id}
                 onClick={() => onSelectClub(club)}
-                className="p-4 bg-white rounded-xl border border-slate-200 text-center shadow-2xs hover:shadow transition-all cursor-pointer group"
+                className="fimf-card-lift p-4 bg-white rounded-xl border border-slate-200 text-center shadow-2xs hover:shadow-md cursor-pointer group"
               >
                 <ClubBadge id={club.id} size="lg" className="mx-auto mb-2" />
                 <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#006039] transition-colors">
@@ -542,7 +436,44 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
             ))}
           </div>
         )}
+        </motion.div>
       </section>
     </div>
   );
 };
+
+/** Bloc « JOURNÉE X » : bandeau + liste de lignes de match à grille stricte (MatchRow). */
+const JourneeSection: React.FC<{
+  title: string;
+  phase: string;
+  accentClass: string;
+  matches: Match[];
+  onSelectMatch: (match: Match) => void;
+  onSelectClub: (club: Club) => void;
+}> = ({ title, phase, accentClass, matches, onSelectMatch, onSelectClub }) => (
+  <div className="space-y-3">
+    <div className={`bg-slate-100 px-4 py-2 rounded-lg border-l-4 ${accentClass} flex items-center justify-between`}>
+      <span className="font-black text-xs sm:text-sm text-slate-800 uppercase tracking-wider">
+        {title}
+      </span>
+      <span className="text-[11px] font-semibold text-slate-500">{phase}</span>
+    </div>
+
+    <div className="bg-white rounded-xl border border-slate-200 shadow-2xs divide-y divide-slate-100 overflow-hidden">
+      <ul>
+        {matches.map((match, i) => (
+          <MatchRow
+            key={match.id}
+            match={match}
+            homeClub={CLUBS_DATA.find((c) => c.id === match.homeTeamId)}
+            awayClub={CLUBS_DATA.find((c) => c.id === match.awayTeamId)}
+            onSelectMatch={onSelectMatch}
+            onSelectClub={onSelectClub}
+            reveal
+            revealIndex={i}
+          />
+        ))}
+      </ul>
+    </div>
+  </div>
+);

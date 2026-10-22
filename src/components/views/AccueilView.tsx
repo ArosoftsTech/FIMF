@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { NavPage } from '../Navbar';
 import {
   CLUBS_DATA as CLUBS_DATA_STATIC,
@@ -15,6 +16,9 @@ import {
 } from '@/src/data/fimfData';
 import { useFimfData } from '../../context/FimfDataContext';
 import { ClubBadge } from '../ClubBadge';
+import { MatchRow } from '../MatchRow';
+import { Reveal, Stagger, StaggerItem } from '../anim/Reveal';
+import { Counter } from '../anim/Counter';
 import { PronosticsModule } from '../PronosticsModule';
 import { WinnersShowcase } from '../WinnersShowcase';
 import { HeroCarousel } from '../HeroCarousel';
@@ -198,6 +202,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 
       {/* 2. MATCH TICKER BANNER ("PROCHAIN MATCH") */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 sm:-mt-8 relative z-20">
+        <Reveal>
         <div className="bg-white rounded-xl shadow-md border border-slate-200/90 overflow-hidden">
           <div className="flex flex-col lg:flex-row items-center justify-between divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
             {/* Left Pill: PROCHAIN MATCH */}
@@ -208,16 +213,17 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
               </span>
             </div>
 
-            {/* Teams Confrontation — grille 1 ligne (jamais empilée) */}
-            <div className="flex-1 w-full px-4 sm:px-6 py-3.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
+            {/* Teams Confrontation — grille 1 ligne (jamais empilée) : 1fr / auto / 1fr */}
+            <div className="flex-1 w-full px-4 sm:px-6 py-3.5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 sm:gap-4">
               <button
                 onClick={() => homeClub && onSelectClub(homeClub)}
-                className="flex items-center justify-end sm:justify-start gap-2 min-w-0 hover:opacity-80 transition-opacity"
+                title={homeClub?.name}
+                className="flex items-center justify-end gap-2 min-w-0 hover:opacity-80 transition-opacity"
               >
-                <ClubBadge id={nextMatch.homeTeamId} size="md" />
-                <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight uppercase truncate">
+                <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight uppercase truncate text-right">
                   {homeClub?.name}
                 </span>
+                <ClubBadge id={nextMatch.homeTeamId} size="md" />
               </button>
 
               <span className="text-xs font-black text-[#ea580c] px-2 py-0.5 rounded bg-orange-50 shrink-0">
@@ -226,12 +232,13 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 
               <button
                 onClick={() => awayClub && onSelectClub(awayClub)}
-                className="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity"
+                title={awayClub?.name}
+                className="flex items-center justify-start gap-2 min-w-0 hover:opacity-80 transition-opacity"
               >
+                <ClubBadge id={nextMatch.awayTeamId} size="md" />
                 <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight uppercase truncate">
                   {awayClub?.name}
                 </span>
-                <ClubBadge id={nextMatch.awayTeamId} size="md" />
               </button>
             </div>
 
@@ -254,7 +261,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             <div className="w-full lg:w-auto p-3 sm:px-5 flex justify-center shrink-0">
               <button
                 onClick={() => onNavigate('calendrier')}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] rounded-lg transition-colors uppercase tracking-wider whitespace-nowrap shadow-xs cursor-pointer"
+                className="fimf-btn-lift w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] rounded-lg transition-colors uppercase tracking-wider whitespace-nowrap shadow-xs cursor-pointer"
               >
                 <span>CALENDRIER DES MATCHS</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -262,10 +269,12 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             </div>
           </div>
         </div>
+        </Reveal>
       </section>
 
       {/* 3. GRANDES ÉCHÉANCES 2026-2027 (avec compte à rebours CAN Guinée 2027) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal>
         <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12">
             {/* Bloc compte à rebours CAN Guinée 2027 */}
@@ -320,6 +329,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             </div>
           </div>
         </div>
+        </Reveal>
         {/* Composant de compte à rebours de la CAN — définition plus bas */}
       </section>
 
@@ -341,12 +351,12 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
-              {latestNews.map((article) => (
+            <Stagger className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
+              {latestNews.map((article, i) => (
+                <StaggerItem key={article.id} index={i}>
                 <div
-                  key={article.id}
                   onClick={() => onSelectArticle(article)}
-                  className="group bg-white rounded-lg border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-col"
+                  className="fimf-card-lift group bg-white rounded-lg border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md cursor-pointer flex flex-col sm:flex-col h-full"
                 >
                   <div className="relative h-40 w-full overflow-hidden bg-slate-900">
                     <img
@@ -375,8 +385,9 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                     </div>
                   </div>
                 </div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
 
           {/* Column 2: CHAMPIONNAT NATIONAL (Mini Table + Upcoming tabs) (4 cols on lg) */}
@@ -398,27 +409,49 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             <div className="flex rounded-md overflow-hidden bg-slate-200 p-0.5 text-xs font-bold">
               <button
                 onClick={() => setChampionnatTab('classement')}
-                className={`flex-1 py-2 text-center rounded transition-colors uppercase cursor-pointer ${
+                className={`relative flex-1 py-2 text-center rounded transition-colors uppercase cursor-pointer ${
                   championnatTab === 'classement'
-                    ? 'bg-[#ea580c] text-white shadow-xs'
+                    ? 'text-white'
                     : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
-                CLASSEMENT
+                {championnatTab === 'classement' && (
+                  <motion.span
+                    layoutId="accueil-champ-tab"
+                    className="absolute inset-0 bg-[#ea580c] rounded shadow-xs"
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="relative">CLASSEMENT</span>
               </button>
               <button
                 onClick={() => setChampionnatTab('matchs')}
-                className={`flex-1 py-2 text-center rounded transition-colors uppercase cursor-pointer ${
+                className={`relative flex-1 py-2 text-center rounded transition-colors uppercase cursor-pointer ${
                   championnatTab === 'matchs'
-                    ? 'bg-[#ea580c] text-white shadow-xs'
+                    ? 'text-white'
                     : 'text-slate-700 hover:text-slate-900'
                 }`}
               >
-                PROCHAINS MATCHS
+                {championnatTab === 'matchs' && (
+                  <motion.span
+                    layoutId="accueil-champ-tab"
+                    className="absolute inset-0 bg-[#ea580c] rounded shadow-xs"
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="relative">PROCHAINS MATCHS</span>
               </button>
             </div>
 
-            {/* Tab content */}
+            {/* Tab content : fondu + léger glissement à chaque changement. */}
+            <motion.div
+              key={championnatTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
             {championnatTab === 'classement' ? (
               <div className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
                 <table className="w-full text-xs text-left">
@@ -468,31 +501,19 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 </table>
               </div>
             ) : (
-              <div className="bg-white rounded-lg border border-slate-200 shadow-2xs divide-y divide-slate-100">
+              <ul className="bg-white rounded-lg border border-slate-200 shadow-2xs divide-y divide-slate-100 overflow-hidden">
                 {MATCHES_DATA.filter((m) => m.journee === 3).slice(0, 3).map((match) => (
-                  <div
+                  <MatchRow
                     key={match.id}
-                    onClick={() => onSelectMatch(match)}
-                    className="p-3 hover:bg-slate-50 transition-colors cursor-pointer text-xs"
-                  >
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1.5">
-                      <span>{match.dateStr} • {match.timeStr}</span>
-                      <span className="font-semibold text-emerald-800">{match.venue}</span>
-                    </div>
-                    <div className="flex items-center justify-between font-bold text-slate-900">
-                      <div className="flex items-center gap-2">
-                        <ClubBadge id={match.homeTeamId} size="xs" />
-                        <span>{CLUBS_DATA.find((c) => c.id === match.homeTeamId)?.name}</span>
-                      </div>
-                      <span className="text-[#ea580c] font-black text-[11px] px-2 py-0.5 rounded bg-orange-50">VS</span>
-                      <div className="flex items-center gap-2">
-                        <span>{CLUBS_DATA.find((c) => c.id === match.awayTeamId)?.name}</span>
-                        <ClubBadge id={match.awayTeamId} size="xs" />
-                      </div>
-                    </div>
-                  </div>
+                    variant="compact"
+                    match={match}
+                    homeClub={CLUBS_DATA.find((c) => c.id === match.homeTeamId)}
+                    awayClub={CLUBS_DATA.find((c) => c.id === match.awayTeamId)}
+                    onSelectMatch={onSelectMatch}
+                    onSelectClub={onSelectClub}
+                  />
                 ))}
-                <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+                <li className="p-2.5 bg-slate-50 border-t border-slate-100 text-center list-none">
                   <button
                     onClick={() => onNavigate('calendrier')}
                     className="text-xs font-bold text-[#ea580c] hover:text-[#c2410c] flex items-center justify-center gap-1.5 w-full uppercase transition-colors cursor-pointer"
@@ -500,9 +521,10 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                     <span>Consulter le calendrier complet</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
-                </div>
-              </div>
+                </li>
+              </ul>
             )}
+            </motion.div>
           </div>
 
           {/* Column 3: LES COMPÉTITIONS (4 cols on lg) */}
@@ -520,12 +542,12 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
               </button>
             </div>
 
-            <div className="space-y-3.5">
-              {majorComps.map((comp) => (
+            <Stagger className="space-y-3.5">
+              {majorComps.map((comp, i) => (
+                <StaggerItem key={comp.id} index={i}>
                 <div
-                  key={comp.id}
                   onClick={() => onSelectCompetition(comp)}
-                  className="group bg-white rounded-lg border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition-all cursor-pointer flex items-center p-3 gap-3.5"
+                  className="fimf-card-lift group bg-white rounded-lg border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md cursor-pointer flex items-center p-3 gap-3.5"
                 >
                   <div className="w-20 h-20 rounded-md overflow-hidden bg-slate-900 shrink-0">
                     <img
@@ -544,19 +566,21 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                     </p>
                     <div className="mt-2 flex items-center text-[10px] font-bold text-[#ea580c] uppercase">
                       <span className="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center group-hover:bg-[#ea580c] group-hover:text-white transition-colors">
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                       </span>
                     </div>
                   </div>
                 </div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
         </div>
       </section>
 
       {/* 3.5. MES CLUBS (Section Favoris localStorage) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal>
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between pb-2 border-b-2 border-slate-200 gap-2">
             <div className="flex items-center gap-2.5">
@@ -762,6 +786,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             </div>
           )}
         </div>
+        </Reveal>
       </section>
 
       {/* 3.8. JEU DE PRONOSTICS LUDIQUE */}
@@ -778,6 +803,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
 
       {/* 4. LA FIMF EN CHIFFRES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal>
         <div className="space-y-4">
           <div className="pb-2 border-b-2 border-slate-200">
             <h2 className="text-base sm:text-lg font-black text-slate-900 uppercase tracking-tight">
@@ -791,7 +817,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 <Shield className="w-5 h-5" />
               </div>
               <p className="text-2xl sm:text-3xl font-black text-[#006039] tabular-nums">
-                {FIMF_STATS.clubsCount}
+                <Counter value={FIMF_STATS.clubsCount} />
               </p>
               <p className="text-[11px] font-bold text-slate-500 uppercase mt-1">
                 {FIMF_STATS.clubsLabel}
@@ -803,7 +829,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 <Users className="w-5 h-5" />
               </div>
               <p className="text-2xl sm:text-3xl font-black text-[#ea580c] tabular-nums">
-                {FIMF_STATS.playersCount}
+                <Counter value={FIMF_STATS.playersCount} />
               </p>
               <p className="text-[11px] font-bold text-slate-500 uppercase mt-1">
                 {FIMF_STATS.playersLabel}
@@ -815,7 +841,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 <Award className="w-5 h-5" />
               </div>
               <p className="text-2xl sm:text-3xl font-black text-[#006039] tabular-nums">
-                {FIMF_STATS.refereesCount}
+                <Counter value={FIMF_STATS.refereesCount} />
               </p>
               <p className="text-[11px] font-bold text-slate-500 uppercase mt-1">
                 {FIMF_STATS.refereesLabel}
@@ -827,7 +853,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                 <TrendingUp className="w-5 h-5" />
               </div>
               <p className="text-2xl sm:text-3xl font-black text-[#ea580c] tabular-nums">
-                {FIMF_STATS.pitchesCount}
+                <Counter value={FIMF_STATS.pitchesCount} />
               </p>
               <p className="text-[11px] font-bold text-slate-500 uppercase mt-1">
                 {FIMF_STATS.pitchesLabel}
@@ -835,10 +861,12 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             </div>
           </div>
         </div>
+        </Reveal>
       </section>
 
       {/* 5. GALERIE PHOTOS & NOS PARTENAIRES ROW */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* GALERIE PHOTOS (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
@@ -904,7 +932,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
               {PARTNERS.slice(0, 4).map((partner) => (
                 <div
                   key={partner.id}
-                  className="h-20 bg-white rounded-lg border border-slate-200/90 flex flex-col items-center justify-center p-2 text-center shadow-2xs hover:border-[#ea580c] transition-colors"
+                  className="fimf-card-lift h-20 bg-white rounded-lg border border-slate-200/90 flex flex-col items-center justify-center p-2 text-center shadow-2xs hover:border-[#ea580c] hover:shadow-md"
                 >
                   <span className="text-xs font-black tracking-tight text-slate-400 uppercase">
                     LOGO
@@ -917,6 +945,7 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
             </div>
           </div>
         </div>
+        </Reveal>
       </section>
     </div>
   );

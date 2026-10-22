@@ -193,6 +193,444 @@
   animation: fimf-backtotop-out 0.25s ease-in both;
 }
 
+/* ───────────────────────────────────────────────
+   Lignes de match FIMF — grille stricte à colonnes fixes
+   (composant réutilisable src/components/MatchRow.tsx)
+   Desktop ≥1024px : 150px 1fr 90px 1fr 220px 100px
+   ─────────────────────────────────────────────── */
+
+.fimf-match-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 90px minmax(0, 1fr) 220px 100px;
+  align-items: center;
+  column-gap: 16px;
+  padding: 16px 24px;
+  list-style: none;
+}
+
+.fimf-match-row:hover {
+  background-color: #f8fafc;
+}
+
+.fimf-match-row__datetime {
+  text-align: left;
+  min-width: 0;
+}
+
+.fimf-match-row__date {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.fimf-match-row__time {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* Lieu sous la date : visible uniquement sur tablette (768–1023px) */
+.fimf-match-row__venue-tablet {
+  display: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fimf-match-row__team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fimf-match-row__team:disabled {
+  cursor: default;
+}
+
+.fimf-match-row__team--home {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.fimf-match-row__team--away {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.fimf-match-row__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+button.fimf-match-row__team:not(:disabled):hover .fimf-match-row__name {
+  color: #006039;
+}
+
+.fimf-match-row__logo {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fimf-match-row__logo img,
+.fimf-match-row__logo > div {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.fimf-match-row__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 90px;
+  text-align: center;
+}
+
+.fimf-match-row__vs {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fimf-match-row__score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 2px 10px;
+  border-radius: 6px;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-family: ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.fimf-match-row__ft {
+  font-size: 10px;
+  font-weight: 900;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fimf-match-row__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 900;
+  color: #c2410c;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.fimf-match-row__live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background-color: #c2410c;
+  animation: fimf-live-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes fimf-live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.fimf-match-row__venue {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.fimf-match-row__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fimf-match-row__details {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #c2410c;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fimf-match-row__details:hover {
+  color: #9a3412;
+}
+
+/* Variante compacte (colonnes étroites : accueil, cartes) : 1fr auto 1fr */
+.fimf-match-row--compact {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 12px;
+}
+
+.fimf-match-row__compact-meta {
+  font-size: 11px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fimf-match-row__compact-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 8px;
+}
+
+.fimf-match-row__details--compact {
+  align-self: flex-end;
+  font-size: 11px;
+}
+
+/* Tablette (768–1023px) : le lieu quitte la ligne et passe sous la date */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .fimf-match-row {
+    grid-template-columns: 170px minmax(0, 1fr) 90px minmax(0, 1fr) 100px;
+  }
+  .fimf-match-row__venue {
+    display: none;
+  }
+  .fimf-match-row__venue-tablet {
+    display: block;
+  }
+}
+
+/* Mobile (<768px) : 2 lignes + bouton pleine largeur */
+@media (max-width: 767.98px) {
+  .fimf-match-row {
+    grid-template-columns: minmax(0, 1fr) 90px minmax(0, 1fr);
+    grid-template-areas:
+      "meta meta meta"
+      "home center away"
+      "actions actions actions";
+    row-gap: 10px;
+    padding: 14px 16px;
+  }
+  .fimf-match-row__datetime {
+    grid-area: meta;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    text-align: left;
+  }
+  .fimf-match-row__venue-tablet {
+    display: block;
+  }
+  .fimf-match-row__team--home {
+    grid-area: home;
+  }
+  .fimf-match-row__center {
+    grid-area: center;
+  }
+  .fimf-match-row__team--away {
+    grid-area: away;
+  }
+  .fimf-match-row__venue {
+    display: none;
+  }
+  .fimf-match-row__actions {
+    grid-area: actions;
+    justify-content: stretch;
+  }
+  .fimf-match-row__details {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: #fff7ed;
+    border: 1px solid #fed7aa;
+  }
+}
+
+/* ───────────────────────────────────────────────
+   Système d'animation FIMF — utilitaires partagés
+   (durées/easings pilotés par src/lib/anim.ts)
+   Règle : transform + opacity uniquement, jamais de CLS.
+   ─────────────────────────────────────────────── */
+
+/* 1. Liens du menu : soulignement qui se déploie de gauche à droite.
+   L'onglet actif garde son soulignement orange. */
+.fimf-nav-link {
+  position: relative;
+}
+.fimf-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background-color: #ea580c;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fimf-nav-link:hover::after {
+  transform: scaleX(1);
+}
+.fimf-nav-link--active::after {
+  transform: scaleX(1);
+}
+
+/* 2. Boutons d'action : soulèvement + ombre au survol, enfoncement au clic. */
+.fimf-btn-lift {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, background-color 0.2s ease-out;
+}
+.fimf-btn-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -8px rgba(234, 88, 12, 0.55);
+}
+.fimf-btn-lift:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 3. Cartes : élévation douce au survol (-6px). Images gérées par les
+   classes Tailwind existantes (scale + overflow hidden). */
+.fimf-card-lift {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease-out, border-color 0.25s ease-out;
+}
+.fimf-card-lift:hover {
+  transform: translateY(-6px);
+}
+
+/* 4. Badge de notification : pulsation discrète (boucle douce, < 3 Hz). */
+@keyframes fimf-notif-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+.fimf-notif-pulse {
+  animation: fimf-notif-pulse 2s ease-in-out infinite;
+}
+
+/* 5. Score : petite montée en puissance quand il change (transform seul). */
+@keyframes fimf-score-pop {
+  0% { transform: scale(0.82); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.fimf-score-pop {
+  animation: fimf-score-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  display: inline-flex;
+}
+
+/* 6. Hero : apparition ligne par ligne (masque + glissement vers le haut),
+   puis sous-titre et boutons en cascade (stagger 100 ms). */
+@keyframes fimf-hero-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fimf-hero-mask {
+  display: block;
+  overflow: hidden;
+}
+.fimf-hero-line {
+  display: block;
+  animation: fimf-hero-line-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.fimf-hero-fade {
+  animation: fimf-fade-in 0.6s ease-out both;
+}
+
+/* 7. Menu mobile : panneau latéral depuis la droite + overlay en fondu. */
+@keyframes fimf-drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.fimf-drawer {
+  animation: fimf-drawer-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.fimf-drawer-overlay {
+  animation: fimf-fade-in 0.25s ease-out both;
+}
+.fimf-drawer-item {
+  animation: fimf-item-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 8. Skeletons : halo pulsé (opacité seule), espace réservé, pas de CLS. */
+@keyframes fimf-skeleton-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.fimf-skeleton {
+  background-color: #e2e8f0;
+  animation: fimf-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+/* 9. Header sticky : transition douce vers l'état compact (250 ms).
+   La hauteur reste fixe (pas de CLS) : seul le logo rétrécit (transform). */
+.fimf-header {
+  transition: box-shadow 0.25s ease-out, background-color 0.25s ease-out;
+}
+.fimf-header-logo {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
+}
+.fimf-header--scrolled .fimf-header-logo {
+  transform: scale(0.86);
+}
+
 /* Accessibilité : désactive les animations si l'utilisateur le préfère */
 @media (prefers-reduced-motion: reduce) {
   .animate-dropdown-in,
@@ -204,7 +642,25 @@
   .animate-lightbox-in,
   .animate-toast-in,
   .animate-backtotop-in,
-  .animate-backtotop-out {
+  .animate-backtotop-out,
+  .fimf-match-row__live-dot,
+  .fimf-notif-pulse,
+  .fimf-hero-line,
+  .fimf-hero-fade,
+  .fimf-drawer,
+  .fimf-drawer-overlay,
+  .fimf-drawer-item,
+  .fimf-score-pop,
+  .fimf-skeleton {
     animation: none;
+  }
+  .fimf-hero-line,
+  .fimf-hero-fade {
+    opacity: 1;
+  }
+  /* Hero : pas de zoom lent (Ken Burns) ni de parallaxe. */
+  .fimf-hero-kenburns {
+    transform: none !important;
+    transition: opacity 0.5s ease-out;
   }
 }

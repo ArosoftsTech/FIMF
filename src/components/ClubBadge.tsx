@@ -3,7 +3,7 @@ import { FimfDataContext } from '../context/FimfDataContext';
 
 interface ClubBadgeProps {
   id: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'match';
   className?: string;
   /** URL de logo prioritaire : aperçu en direct dans les formulaires (pas encore enregistré en base). */
   logoOverrideUrl?: string;
@@ -15,6 +15,8 @@ const sizeMap = {
   md: 'w-10 h-10 text-xs',
   lg: 'w-14 h-14 text-sm',
   xl: 'w-20 h-20 text-base',
+  /** Taille fixe des lignes de match (grille stricte MatchRow : 32×32). */
+  match: 'w-8 h-8 text-[10px]',
 };
 
 /**

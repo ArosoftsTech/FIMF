@@ -7,6 +7,8 @@ import {
   Club,
 } from '@/src/data/fimfData';
 import { ClubBadge } from '../ClubBadge';
+import { MatchRow } from '../MatchRow';
+import { Reveal } from '../anim/Reveal';
 import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import {
   Calendar as CalendarIcon,
@@ -201,6 +203,7 @@ export const CalendrierView: React.FC<CalendrierViewProps> = ({
 
       {/* 2. MAIN CONTROLS & FILTERING BAR */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5">
           {/* Top Row: Search input + View toggle + Favorites switch */}
           <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
@@ -366,6 +369,7 @@ export const CalendrierView: React.FC<CalendrierViewProps> = ({
             </div>
           </div>
         </div>
+        </Reveal>
       </section>
 
       {/* 3. MATCHES LIST OR EMPTY STATE */}
@@ -405,17 +409,22 @@ export const CalendrierView: React.FC<CalendrierViewProps> = ({
                   <div className="flex-1 h-px bg-slate-200"></div>
                 </div>
 
-                {/* Match items in this date */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {matches.map((match) => (
-                    <MatchCard
-                      key={match.id}
-                      match={match}
-                      onSelectMatch={onSelectMatch}
-                      onSelectClub={onSelectClub}
-                      favoriteIds={favoriteIds}
-                    />
-                  ))}
+                {/* Matchs du jour : lignes à grille stricte (alignement vertical garanti) */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-2xs divide-y divide-slate-100 overflow-hidden">
+                  <ul>
+                    {matches.map((match, i) => (
+                      <MatchRow
+                        key={match.id}
+                        match={match}
+                        homeClub={CLUBS_DATA.find((c) => c.id === match.homeTeamId)}
+                        awayClub={CLUBS_DATA.find((c) => c.id === match.awayTeamId)}
+                        onSelectMatch={onSelectMatch}
+                        onSelectClub={onSelectClub}
+                        reveal
+                        revealIndex={i}
+                      />
+                    ))}
+                  </ul>
                 </div>
               </div>
             ))}
@@ -464,7 +473,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   return (
     <div
       onClick={() => onSelectMatch(match)}
-      className="group bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all cursor-pointer p-4 flex flex-col justify-between"
+      className="fimf-card-lift group bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 cursor-pointer p-4 flex flex-col justify-between"
     >
       {/* Top bar: Competition Badge & Time/Status */}
       <div className="flex items-center justify-between pb-3 border-b border-slate-100 gap-2">

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { GALLERY_PHOTOS, GalleryPhoto } from '@/src/data/fimfData';
 import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { Maximize2, MapPin, Calendar, Plus } from 'lucide-react';
+import { Stagger, StaggerItem } from '../anim/Reveal';
 
 interface GalerieViewProps {
   onOpenPhotoLightbox: (index: number) => void;
@@ -62,13 +64,21 @@ export const GalerieView: React.FC<GalerieViewProps> = ({ onOpenPhotoLightbox })
                   setSelectedCategory(cat);
                   setVisibleCount(8);
                 }}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
+                className={`relative px-4 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer select-none uppercase tracking-wide ${
                   isActive
-                    ? 'bg-[#ea580c] text-white shadow-xs'
+                    ? 'text-white'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                {cat}
+                {isActive && (
+                  <motion.span
+                    layoutId="galerie-category"
+                    className="absolute inset-0 bg-[#ea580c] rounded-lg shadow-xs"
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="relative">{cat}</span>
               </button>
             );
           })}
@@ -77,12 +87,12 @@ export const GalerieView: React.FC<GalerieViewProps> = ({ onOpenPhotoLightbox })
 
       {/* 3. PHOTO GRID (matching screenshot 8) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Stagger className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {displayedPhotos.map((photo, idx) => (
+            <StaggerItem key={photo.id} index={idx}>
             <div
-              key={photo.id}
               onClick={() => onOpenPhotoLightbox(idx)}
-              className="group relative aspect-4/3 rounded-xl overflow-hidden bg-slate-900 shadow-2xs hover:shadow-lg transition-all cursor-pointer"
+              className="fimf-card-lift group relative aspect-4/3 rounded-xl overflow-hidden bg-slate-900 shadow-2xs hover:shadow-lg cursor-pointer"
             >
               <img
                 src={photo.image}
@@ -110,8 +120,9 @@ export const GalerieView: React.FC<GalerieViewProps> = ({ onOpenPhotoLightbox })
                 </div>
               </div>
             </div>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
         {/* Load More Button (+ Voir plus) */}
         {visibleCount < filteredPhotos.length && (

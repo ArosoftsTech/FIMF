@@ -200,21 +200,6 @@ export const EspaceClubModal: React.FC<EspaceClubModalProps> = ({ isOpen, onClos
                 </div>
               )}
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  Code d'accès sécurisé FIMF
-                </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    defaultValue="FIMF2025"
-                    className="w-full text-xs rounded-lg border border-slate-300 p-2.5 pl-9 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#006039]"
-                  />
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                </div>
-              </div>
-
               <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 text-xs text-emerald-900 flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                 <div>

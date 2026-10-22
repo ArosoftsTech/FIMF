@@ -174,8 +174,31 @@ create table if not exists public.sponsor_requests (
 
 -- ---------------------------------------------------------------------
 -- 2. ROW LEVEL SECURITY
---    Lecture publique, écriture réservée aux utilisateurs authentifiés
+--    Lecture publique, écriture réservée aux administrateurs fédéraux
+--    (table public.fimf_admins — voir aussi supabase/club-users-rls.sql)
 -- ---------------------------------------------------------------------
+create table if not exists public.fimf_admins (
+  user_id uuid not null primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table public.fimf_admins enable row level security;
+
+drop policy if exists "read own admin row" on public.fimf_admins;
+create policy "read own admin row" on public.fimf_admins
+  for select to authenticated using (user_id = auth.uid());
+
+-- security definer : évite la récursion des policies sur fimf_admins
+create or replace function public.is_fimf_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from public.fimf_admins where user_id = auth.uid());
+$$;
+
 alter table public.clubs          enable row level security;
 alter table public.players        enable row level security;
 alter table public.matches        enable row level security;
@@ -200,30 +223,43 @@ begin
   end loop;
 end $$;
 
--- Écriture admin (authentifié)
+-- Écriture réservée aux admins fédéraux (fimf_admins).
+-- Les dirigeants de club sont traités par supabase/security-hardening.sql
+-- (clubs / players / matches restreints à leur club via public.owns_club).
 do $$
 declare t text;
 begin
   foreach t in array array['clubs','players','matches','news_articles','competitions','gallery_photos','site_stats','partners','officials','commissions']
   loop
     execute format('drop policy if exists "admin write %1$s" on public.%1$I;', t);
-    execute format('create policy "admin write %1$s" on public.%1$I for all to authenticated using (true) with check (true);', t);
+    execute format(
+      'create policy "admin write %1$s" on public.%1$I for all to authenticated using (public.is_fimf_admin()) with check (public.is_fimf_admin());',
+      t
+    );
   end loop;
 end $$;
 
--- Logs d'audit : lisibles par l'admin, insérables par tous (traçabilité)
+-- Logs d'audit : lecture réservée à l'admin, écriture aux comptes authentifiés
 drop policy if exists "admins read audit logs" on public.audit_logs;
-create policy "admins read audit logs" on public.audit_logs for select to authenticated using (true);
+create policy "admins read audit logs" on public.audit_logs for select to authenticated using (public.is_fimf_admin());
 
 drop policy if exists "anyone insert audit logs" on public.audit_logs;
-create policy "anyone insert audit logs" on public.audit_logs for insert to anon, authenticated with check (true);
+drop policy if exists "authenticated insert audit logs" on public.audit_logs;
+create policy "authenticated insert audit logs" on public.audit_logs for insert to authenticated with check (true);
 
--- Demandes de sponsoring : insertion publique (formulaire), lecture réservée à l'admin
+-- Demandes de sponsoring : insertion publique (formulaire),
+-- lecture/édition réservées à l'admin (données personnelles : email, téléphone)
 drop policy if exists "anyone can submit sponsor request" on public.sponsor_requests;
-create policy "anyone can submit sponsor request" on public.sponsor_requests for insert to anon, authenticated with check (true);
+create policy "anyone can submit sponsor request" on public.sponsor_requests for insert to anon, authenticated with check (status = 'nouvelle');
 
 drop policy if exists "admins read sponsor requests" on public.sponsor_requests;
-create policy "admins read sponsor requests" on public.sponsor_requests for select to authenticated using (true);
+create policy "admins read sponsor requests" on public.sponsor_requests for select to authenticated using (public.is_fimf_admin());
+
+drop policy if exists "admins update sponsor requests" on public.sponsor_requests;
+create policy "admins update sponsor requests" on public.sponsor_requests for update to authenticated using (public.is_fimf_admin()) with check (public.is_fimf_admin());
+
+drop policy if exists "admins delete sponsor requests" on public.sponsor_requests;
+create policy "admins delete sponsor requests" on public.sponsor_requests for delete to authenticated using (public.is_fimf_admin());
 
 -- ---------------------------------------------------------------------
 -- 3. REALTIME (scores et classement en direct)
@@ -260,8 +296,8 @@ create policy "fimf media public read" on storage.objects
 drop policy if exists "fimf media admin write" on storage.objects;
 create policy "fimf media admin write" on storage.objects
   for all to authenticated
-  using (bucket_id = 'fimf-media')
-  with check (bucket_id = 'fimf-media');
+  using (bucket_id = 'fimf-media' and public.is_fimf_admin())
+  with check (bucket_id = 'fimf-media' and public.is_fimf_admin());
 
 -- ---------------------------------------------------------------------
 -- 5. SEED — purge puis insertion des données officielles

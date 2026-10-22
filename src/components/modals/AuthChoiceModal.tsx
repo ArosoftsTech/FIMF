@@ -6,7 +6,6 @@ import {
   BadgeCheck,
   UserPlus,
   Mail,
-  Lock,
   Loader2,
   CheckCircle2,
   Send,
@@ -68,7 +67,7 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
     handleClose();
   };
   const [tab, setTab] = useState<'connexion' | 'membre'>('connexion');
-  const [form, setForm] = useState({ fullName: '', email: '', password: '' });
+  const [form, setForm] = useState({ fullName: '', email: '' });
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<FormError | null>(null);
@@ -80,7 +79,7 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
 
   const reset = () => {
     setTab('connexion');
-    setForm({ fullName: '', email: '', password: '' });
+    setForm({ fullName: '', email: '' });
     setLoginError(null);
     setSuccess(false);
     setError(null);
@@ -124,20 +123,17 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
   const handleMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!form.fullName.trim() || !form.email.trim() || !form.password) {
-      setError({ field: null, message: 'Nom, email et mot de passe sont obligatoires.' });
-      return;
-    }
-    if (form.password.length < 6) {
-      setError({ field: 'password', message: 'Mot de passe : 6 caractères minimum.' });
+    if (!form.fullName.trim() || !form.email.trim()) {
+      setError({ field: 'email', message: 'Nom et email sont obligatoires.' });
       return;
     }
     setSending(true);
     try {
+      // Aucun mot de passe n'est envoyé ni stocké : le compte est créé lors de
+      // l'approbation et le membre reçoit un lien sécurisé pour le définir.
       const { error: insertError } = await supabase.from('member_requests').insert({
         full_name: form.fullName.trim(),
         email: form.email.trim().toLowerCase(),
-        password: form.password,
       });
       if (insertError) {
         if ((insertError as { code?: string }).code === '23505') {
@@ -150,7 +146,7 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
         }
       } else {
         setSuccess(true);
-        setForm({ fullName: '', email: '', password: '' });
+        setForm({ fullName: '', email: '' });
       }
     } catch {
       setError({
@@ -358,7 +354,8 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
                   <h3 className="text-lg font-black text-slate-900">Demande envoyée !</h3>
                   <p className="text-sm text-slate-600 max-w-xs mx-auto">
                     Merci pour votre intérêt ! La FIMF étudie les demandes d'adhésion et vous
-                    répondra par email sous quelques jours.
+                    répondra par email sous quelques jours. Si elle est acceptée, un email vous
+                    permettra de définir votre mot de passe.
                   </p>
                   <button
                     onClick={handleClose}
@@ -419,23 +416,10 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
                         />
                       </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Mot de passe *
-                      </label>
-                      <div className="relative">
-                        <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="password"
-                          value={form.password}
-                          onChange={set('password')}
-                          placeholder="6 caractères minimum"
-                          className={`w-full pl-9 pr-3 py-2.5 bg-slate-50 border rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/50 ${
-                            errField('password') ? 'border-red-300 bg-red-50' : 'border-slate-200'
-                          }`}
-                        />
-                      </div>
-                    </div>
+                    <p className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-[11px] text-emerald-900 leading-relaxed">
+                      Après validation de votre demande, vous recevrez un email vous permettant
+                      de <b>définir votre mot de passe</b>. Aucun mot de passe n'est demandé ici.
+                    </p>
 
                     {error && (
                       <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-bold">

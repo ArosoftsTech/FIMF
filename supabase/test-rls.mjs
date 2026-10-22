@@ -18,6 +18,21 @@ if (!ANON) {
   process.exit(1);
 }
 
+// Identifiants de test fournis à l'exécution : aucun mot de passe n'est
+// versionné dans ce dépôt.
+const DIR_EMAIL = process.env.TEST_CLUB_EMAIL ?? 'plateau@fimf.ci';
+const DIR_PASSWORD = process.env.TEST_CLUB_PASSWORD;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@fimf.ci';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!DIR_PASSWORD || !ADMIN_PASSWORD) {
+  console.error(
+    'Variables TEST_CLUB_PASSWORD et ADMIN_PASSWORD requises :\n' +
+      '  TEST_CLUB_PASSWORD=... ADMIN_PASSWORD=... node supabase/test-rls.mjs',
+  );
+  process.exit(1);
+}
+
 let failures = 0;
 
 function check(label, ok, detail = '') {
@@ -59,8 +74,8 @@ function rest(token) {
 }
 
 // ---------------------------------------------------------------------
-console.log('=== 1. DIRIGEANT as-plateau (plateau@fimf.ci) ===');
-const dirToken = await signIn('plateau@fimf.ci', '***REMOVED***');
+console.log(`=== 1. DIRIGEANT as-plateau (${DIR_EMAIL}) ===`);
+const dirToken = await signIn(DIR_EMAIL, DIR_PASSWORD);
 const dir = rest(dirToken);
 
 // 1a. Lecture publique : il voit tous les clubs
@@ -127,8 +142,8 @@ r = await dir('POST', 'news_articles', {
 check('Création d\'une actualité fédérale refusée', r.status >= 400, `status=${r.status}`);
 
 // ---------------------------------------------------------------------
-console.log('\n=== 2. ADMIN FÉDÉRAL (admin@fimf.ci) ===');
-const admToken = await signIn('admin@fimf.ci', process.env.ADMIN_PASSWORD ?? '***REMOVED***');
+console.log(`\n=== 2. ADMIN FÉDÉRAL (${ADMIN_EMAIL}) ===`);
+const admToken = await signIn(ADMIN_EMAIL, ADMIN_PASSWORD);
 const adm = rest(admToken);
 
 // 2a. Il peut modifier n'importe quel club

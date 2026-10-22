@@ -196,21 +196,31 @@ $$;
 
 -- Classement d'une période (exécuté par un admin pour le tirage) :
 -- retourne user_id, total_points, nb de pronostics, rang.
+-- Garde is_fimf_admin() en base : la fonction est security definer et expose
+-- les identifiants de tous les membres, elle ne doit jamais être publique.
 create or replace function public.admin_period_leaderboard(p_period_id bigint)
 returns table (rank bigint, user_id uuid, total_points bigint, predictions bigint)
-language sql
+language plpgsql
+stable
 security definer
 set search_path = public
 as $$
-  select
-    row_number() over (order by sum(coalesce(points, 0)) desc, count(*) desc) as rank,
-    user_id,
-    sum(coalesce(points, 0))::bigint as total_points,
-    count(*)::bigint as predictions
-  from public.match_predictions
-  where period_id = p_period_id
-  group by user_id
-  order by rank;
+begin
+  if not public.is_fimf_admin() then
+    raise exception 'Réservé aux admins FIMF';
+  end if;
+
+  return query
+    select
+      (row_number() over (order by sum(coalesce(mp.points, 0)) desc, count(*) desc))::bigint,
+      mp.user_id,
+      sum(coalesce(mp.points, 0))::bigint,
+      count(*)::bigint
+    from public.match_predictions mp
+    where mp.period_id = p_period_id
+    group by mp.user_id
+    order by 1;
+end;
 $$;
 
 -- Tirage au sort reproductible : attribue les rangs 1..winners_count parmi les
@@ -553,12 +563,22 @@ create policy "members read own tickets" on public.draw_tickets
   for select to authenticated using (user_id = auth.uid());
 
 -- ---------------------------------------------------------------------
--- ACCÈS ADMIN FONCTIONS SENSIBLES : révoquer l'exécution publique
+-- ACCÈS ADMIN FONCTIONS SENSIBLES
+--   Les RPC admin sont security definer : on révoque l'exécution publique
+--   (anon) mais on la conserve pour « authenticated », car le dashboard
+--   admin s'authentifie normalement et chaque fonction vérifie elle-même
+--   public.is_fimf_admin() avant d'agir.
 -- ---------------------------------------------------------------------
-revoke execute on function public.admin_evaluate_period_predictions(bigint) from anon, authenticated;
-revoke execute on function public.admin_period_leaderboard(bigint) from anon, authenticated;
-revoke execute on function public.admin_run_period_draw(bigint, text) from anon, authenticated;
-revoke execute on function public.admin_run_scholarship_draw(bigint, text) from anon, authenticated;
+revoke all on function public.admin_evaluate_period_predictions(bigint) from public;
+revoke all on function public.admin_period_leaderboard(bigint) from public;
+revoke all on function public.admin_run_period_draw(bigint, text) from public;
+revoke all on function public.admin_run_scholarship_draw(bigint, text) from public;
+
+grant execute on function public.admin_evaluate_period_predictions(bigint) to authenticated;
+grant execute on function public.admin_period_leaderboard(bigint) to authenticated;
+grant execute on function public.admin_run_period_draw(bigint, text) to authenticated;
+grant execute on function public.admin_run_scholarship_draw(bigint, text) to authenticated;
+grant execute on function public.is_fimf_admin() to anon, authenticated;
 
 grant execute on function public.member_period_leaderboard(bigint) to authenticated;
 grant execute on function public.draw_winners_public(bigint) to anon, authenticated;

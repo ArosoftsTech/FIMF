@@ -14,6 +14,13 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabaseClient';
+import {
+  clientRateLimitRemaining,
+  formatWait,
+  isRateLimitError,
+  RATE_LIMIT_MESSAGE,
+  recordClientAttempt,
+} from '../../lib/rateLimit';
 
 interface AuthChoiceModalProps {
   isOpen: boolean;
@@ -127,6 +134,15 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
       setError({ field: 'email', message: 'Nom et email sont obligatoires.' });
       return;
     }
+    // Quota local : évite qu'un double clic consomme le quota serveur.
+    const remaining = clientRateLimitRemaining('member_requests');
+    if (remaining > 0) {
+      setError({
+        field: null,
+        message: `Trop de demandes envoyées depuis cet appareil. Réessayez dans ${formatWait(remaining)}.`,
+      });
+      return;
+    }
     setSending(true);
     try {
       // Aucun mot de passe n'est envoyé ni stocké : le compte est créé lors de
@@ -141,10 +157,13 @@ export const AuthChoiceModal: React.FC<AuthChoiceModalProps> = ({
             field: 'email',
             message: 'Une demande existe déjà avec cet email — ou connectez-vous directement.',
           });
+        } else if (isRateLimitError(insertError)) {
+          setError({ field: null, message: RATE_LIMIT_MESSAGE });
         } else {
           throw insertError;
         }
       } else {
+        recordClientAttempt('member_requests');
         setSuccess(true);
         setForm({ fullName: '', email: '' });
       }

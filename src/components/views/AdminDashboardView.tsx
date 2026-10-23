@@ -4,6 +4,7 @@ import type { SponsorRequestStatus, MemberRequestStatus } from '@/src/lib/fimfAp
 import { Club, Match, NewsArticle, Competition, GalleryPhoto, HeroSlide, Player } from '@/src/data/fimfData';
 import { ClubBadge } from '../ClubBadge';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../ToastProvider';
 import { ImageUploadField } from '../admin/ImageUploadField';
 import { AdminGamesTab } from '../admin/AdminGamesTab';
 import { fetchGamePeriods } from '@/src/lib/fimfApi';
@@ -152,6 +153,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toast = useToast();
 
   // Compteur de périodes de jeu pour le badge de navigation
   const [gamePeriods, setGamePeriods] = useState<{ id: number }[]>([]);
@@ -203,7 +205,18 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [editingOfficial, editingCommission, editingClub, editingMatch, editingNews, editingComp, editingPhoto, editingPartner, editingHero]);
 
-  const showFeedback = (msg: string) => {
+  /**
+   * Canal de retour du back-office.
+   * - `success` : bandeau vert en haut de page (desktop).
+   * - `error`   : toast rouge, visible aussi sur mobile — le bandeau est
+   *               masqué en dessous de `md`, une erreur d'écriture ne doit
+   *               jamais passer inaperçue.
+   */
+  const showFeedback = (msg: string, tone: 'success' | 'error' = 'success') => {
+    if (tone === 'error') {
+      toast.error('Action refusée', msg);
+      return;
+    }
     setFeedbackMsg(msg);
     setTimeout(() => setFeedbackMsg(null), 3500);
   };
@@ -1152,7 +1165,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                                   m.homeTeamId !== myClubId &&
                                   m.awayTeamId !== myClubId
                                 ) {
-                                  showFeedback('Action refusée : ce match ne concerne pas votre club');
+                                  showFeedback('Action refusée : ce match ne concerne pas votre club', 'error');
                                   return;
                                 }
                                 if (window.confirm('Supprimer cette rencontre ?')) {
@@ -1193,7 +1206,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                   <button
                     onClick={() => {
                       if (!isAdmin) {
-                        showFeedback('Seul l\'administrateur fédéral peut affilier un nouveau club');
+                        showFeedback('Seul l\'administrateur fédéral peut affilier un nouveau club', 'error');
                         return;
                       }
                       setEditingClub({
@@ -2117,8 +2130,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             {/* ------------------------------------------------------------- */}
             {activeTab === 'games' && (
               <AdminGamesTab
-                showFeedback={(msg) => {
-                  showFeedback(msg);
+                showFeedback={(msg, tone) => {
+                  showFeedback(msg, tone);
                   fetchGamePeriods().then((ps) => setGamePeriods(ps)).catch(() => undefined);
                 }}
               />
@@ -2409,7 +2422,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                     editingMatch.homeTeamId !== myClubId &&
                     editingMatch.awayTeamId !== myClubId
                   ) {
-                    showFeedback('Action refusée : un dirigeant ne peut gérer que les matchs de son club');
+                    showFeedback('Action refusée : un dirigeant ne peut gérer que les matchs de son club', 'error');
                     return;
                   }
                   saveMatch(editingMatch);
@@ -2835,7 +2848,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                   const seen = new Set<number>();
                   for (const sp of editingClub.squad) {
                     if (seen.has(sp.number)) {
-                      showFeedback(`Numéro de maillot ${sp.number} en doublon — corrige avant d'enregistrer`);
+                      showFeedback(`Numéro de maillot ${sp.number} en doublon — corrige avant d'enregistrer`, 'error');
                       return;
                     }
                     seen.add(sp.number);
@@ -3280,7 +3293,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
               <button
                 onClick={() => {
                   if (!editingOfficial.name.trim() || !editingOfficial.role.trim()) {
-                    showFeedback('Nom et fonction du dirigeant obligatoires');
+                    showFeedback('Nom et fonction du dirigeant obligatoires', 'error');
                     return;
                   }
                   saveOfficial(editingOfficial);
@@ -3404,7 +3417,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
               <button
                 onClick={() => {
                   if (!editingCommission.name.trim() || !editingCommission.president.trim()) {
-                    showFeedback('Nom et président de la commission obligatoires');
+                    showFeedback('Nom et président de la commission obligatoires', 'error');
                     return;
                   }
                   saveCommission(editingCommission);

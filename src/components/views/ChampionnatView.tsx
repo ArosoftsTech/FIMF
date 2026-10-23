@@ -1,10 +1,9 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MATCHES_DATA, CLUBS_DATA, Match, Club } from '@/src/data/fimfData';
 import { ClubBadge } from '../ClubBadge';
 import { MatchRow } from '../MatchRow';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
-import trophyImg from '@/src/assets/images/championship_trophy_gold_1790335980246.jpg';
 import {
   Calendar,
   MapPin,
@@ -68,11 +67,11 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-30">
-          <img
-            src={heroImg}
+          <ResponsiveImage
+            name="hero_ivory_coast_minifootball_1790335944178.jpg"
             alt="Championnat National de Mini-Football"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -233,11 +232,10 @@ export const ChampionnatView: React.FC<ChampionnatViewProps> = ({
                   </div>
                 </div>
                 <div className="md:col-span-4">
-                  <img
-                    src={trophyImg}
+                  <ResponsiveImage
+                    name="championship_trophy_gold_1790335980246.jpg"
                     alt="Trophée Championnat"
                     className="rounded-lg shadow-sm w-full object-cover"
-                    referrerPolicy="no-referrer"
                   />
                 </div>
               </div>

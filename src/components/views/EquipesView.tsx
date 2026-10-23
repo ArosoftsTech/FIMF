@@ -1,9 +1,9 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState } from 'react';
 import { CLUBS_DATA, Club } from '@/src/data/fimfData';
 import { useFimfData } from '../../context/FimfDataContext';
 import { ClubBadge } from '../ClubBadge';
 import { Stagger, StaggerItem } from '../anim/Reveal';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { Search, ChevronDown, ArrowRight, MapPin, Users, Star } from 'lucide-react';
 
 interface EquipesViewProps {
@@ -49,11 +49,11 @@ export const EquipesView: React.FC<EquipesViewProps> = ({
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-30">
-          <img
-            src={heroImg}
+          <ResponsiveImage
+            name="hero_ivory_coast_minifootball_1790335944178.jpg"
             alt="Les Équipes du Championnat National FIMF"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">

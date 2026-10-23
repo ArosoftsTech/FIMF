@@ -1,3 +1,4 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState, useMemo } from 'react';
 import {
   MATCHES_DATA,
@@ -9,7 +10,6 @@ import {
 import { ClubBadge } from '../ClubBadge';
 import { MatchRow } from '../MatchRow';
 import { Reveal } from '../anim/Reveal';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import {
   Calendar as CalendarIcon,
   Filter,
@@ -163,11 +163,11 @@ export const CalendrierView: React.FC<CalendrierViewProps> = ({
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-25">
-          <img
-            src={heroImg}
+          <ResponsiveImage
+            name="hero_ivory_coast_minifootball_1790335944178.jpg"
             alt="Calendrier officiel des compétitions FIMF"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">

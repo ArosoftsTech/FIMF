@@ -1,7 +1,7 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { COMPETITIONS_DATA, Competition } from '@/src/data/fimfData';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { ArrowRight, Trophy, Users, Calendar, Award } from 'lucide-react';
 import { Stagger, StaggerItem } from '../anim/Reveal';
 
@@ -58,11 +58,11 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-30">
-          <img
-            src={heroImg}
+          <ResponsiveImage
+            name="hero_ivory_coast_minifootball_1790335944178.jpg"
             alt="Compétitions FIMF"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -127,15 +127,19 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
               className="fimf-card-lift bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col hover:shadow-md group h-full"
             >
               <div className="relative h-48 w-full overflow-hidden bg-slate-900">
-                <img
-                  src={comp.image}
+                <ResponsiveImage
+                  name={comp.image}
                   alt={comp.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  referrerPolicy="no-referrer"
                 />
                 <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 text-white text-[10px] font-bold rounded uppercase backdrop-blur-xs">
                   {comp.period}
                 </span>
+                {comp.badge && (
+                  <span className="absolute top-3 right-3 px-2.5 py-1 bg-[#ea580c] text-white text-[10px] font-bold rounded uppercase shadow-xs">
+                    {comp.badge}
+                  </span>
+                )}
               </div>
 
               <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
@@ -180,11 +184,10 @@ export const CompetitionsView: React.FC<CompetitionsViewProps> = ({
                 className="fimf-card-lift bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden flex items-center p-4 gap-4 hover:shadow-md group h-full"
               >
                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-900 shrink-0">
-                  <img
-                    src={comp.image}
+                  <ResponsiveImage
+                    name={comp.image}
                     alt={comp.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    referrerPolicy="no-referrer"
                   />
                 </div>
 

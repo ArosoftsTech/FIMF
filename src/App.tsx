@@ -39,6 +39,7 @@ import {
 import { useFavoriteClubs } from './hooks/useFavoriteClubs';
 import { useNotifications } from './hooks/useNotifications';
 import { NotificationToast } from './components/NotificationToast';
+import { ToastProvider } from './components/ToastProvider';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FimfDataProvider, useFimfData } from './context/FimfDataContext';
 import { AdminLoginView } from './components/AdminLoginView';
@@ -48,7 +49,9 @@ export default function App() {
   return (
     <AuthProvider>
       <FimfDataProvider>
-        <AppInner />
+        <ToastProvider>
+          <AppInner />
+        </ToastProvider>
       </FimfDataProvider>
     </AuthProvider>
   );

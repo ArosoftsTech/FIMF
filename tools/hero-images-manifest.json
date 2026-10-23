@@ -1,0 +1,132 @@
+{
+  "championship_trophy_gold_1790335980246.jpg": {
+    "base": "championship_trophy_gold_1790335980246",
+    "height": 896,
+    "jpeg": 162949,
+    "variants": {
+      "1024": {
+        "h": 765,
+        "jpg": 127387,
+        "w": 1024,
+        "webp": 75944
+      },
+      "1200": {
+        "h": 896,
+        "jpg": 162949,
+        "w": 1200,
+        "webp": 93642
+      },
+      "640": {
+        "h": 478,
+        "jpg": 63099,
+        "w": 640,
+        "webp": 42116
+      }
+    },
+    "width": 1200
+  },
+  "fimf_headquarters_building_1790335956733.jpg": {
+    "base": "fimf_headquarters_building_1790335956733",
+    "height": 768,
+    "jpeg": 183352,
+    "variants": {
+      "1024": {
+        "h": 572,
+        "jpg": 110638,
+        "w": 1024,
+        "webp": 72744
+      },
+      "1376": {
+        "h": 768,
+        "jpg": 183352,
+        "w": 1376,
+        "webp": 114562
+      },
+      "640": {
+        "h": 357,
+        "jpg": 48965,
+        "w": 640,
+        "webp": 33788
+      }
+    },
+    "width": 1376
+  },
+  "hero_ivory_coast_minifootball_1790335944178.jpg": {
+    "base": "hero_ivory_coast_minifootball_1790335944178",
+    "height": 768,
+    "jpeg": 209605,
+    "variants": {
+      "1024": {
+        "h": 572,
+        "jpg": 131119,
+        "w": 1024,
+        "webp": 93334
+      },
+      "1376": {
+        "h": 768,
+        "jpg": 209605,
+        "w": 1376,
+        "webp": 139930
+      },
+      "640": {
+        "h": 357,
+        "jpg": 61345,
+        "w": 640,
+        "webp": 47708
+      }
+    },
+    "width": 1376
+  },
+  "referee_training_session_1790335992555.jpg": {
+    "base": "referee_training_session_1790335992555",
+    "height": 896,
+    "jpeg": 213254,
+    "variants": {
+      "1024": {
+        "h": 765,
+        "jpg": 162897,
+        "w": 1024,
+        "webp": 113160
+      },
+      "1200": {
+        "h": 896,
+        "jpg": 213254,
+        "w": 1200,
+        "webp": 144990
+      },
+      "640": {
+        "h": 478,
+        "jpg": 73087,
+        "w": 640,
+        "webp": 53478
+      }
+    },
+    "width": 1200
+  },
+  "team_huddle_elephants_1790335968616.jpg": {
+    "base": "team_huddle_elephants_1790335968616",
+    "height": 896,
+    "jpeg": 195054,
+    "variants": {
+      "1024": {
+        "h": 765,
+        "jpg": 152580,
+        "w": 1024,
+        "webp": 97200
+      },
+      "1200": {
+        "h": 896,
+        "jpg": 195054,
+        "w": 1200,
+        "webp": 118814
+      },
+      "640": {
+        "h": 478,
+        "jpg": 72453,
+        "w": 640,
+        "webp": 52940
+      }
+    },
+    "width": 1200
+  }
+}

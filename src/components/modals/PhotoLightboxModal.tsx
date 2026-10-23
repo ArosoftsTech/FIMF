@@ -1,3 +1,4 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React from 'react';
 import { GalleryPhoto } from '@/src/data/fimfData';
 import { X, ChevronLeft, ChevronRight, MapPin, Calendar } from 'lucide-react';
@@ -65,11 +66,10 @@ export const PhotoLightboxModal: React.FC<PhotoLightboxModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         className="relative max-w-5xl max-h-[85vh] flex flex-col items-center animate-lightbox-in"
       >
-        <img
-          src={photo.image}
+        <ResponsiveImage
+          name={photo.image}
           alt={photo.title}
           className="max-h-[72vh] max-w-full rounded-lg shadow-2xl object-contain"
-          referrerPolicy="no-referrer"
         />
 
         <div className="mt-4 text-center text-white max-w-2xl px-4 animate-accordion-in" style={{ animationDelay: '120ms' }}>

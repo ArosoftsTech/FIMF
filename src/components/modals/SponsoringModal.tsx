@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { X, Handshake, Mail, Phone, Building2, Send, CheckCircle2, Loader2, TrendingUp, Eye, Trophy } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
+import {
+  clientRateLimitRemaining,
+  formatWait,
+  isRateLimitError,
+  RATE_LIMIT_MESSAGE,
+  recordClientAttempt,
+} from '../../lib/rateLimit';
 
 interface SponsoringModalProps {
   isOpen: boolean;
@@ -49,6 +56,14 @@ export const SponsoringModal: React.FC<SponsoringModalProps> = ({ isOpen, onClos
       setError('Entreprise, nom du contact et email sont obligatoires.');
       return;
     }
+    // Quota local : évite qu'un double clic consomme le quota serveur.
+    const remaining = clientRateLimitRemaining('sponsor_requests');
+    if (remaining > 0) {
+      setError(
+        `Trop de demandes envoyées depuis cet appareil. Réessayez dans ${formatWait(remaining)}.`
+      );
+      return;
+    }
     setSending(true);
     try {
       const { error: dbError } = await supabase.from('sponsor_requests').insert({
@@ -59,7 +74,14 @@ export const SponsoringModal: React.FC<SponsoringModalProps> = ({ isOpen, onClos
         pack: form.pack,
         message: form.message.trim() || null,
       });
-      if (dbError) throw dbError;
+      if (dbError) {
+        if (isRateLimitError(dbError)) {
+          setError(RATE_LIMIT_MESSAGE);
+          return;
+        }
+        throw dbError;
+      }
+      recordClientAttempt('sponsor_requests');
       setSuccess(true);
       setForm(initialForm);
     } catch (err) {

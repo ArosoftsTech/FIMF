@@ -1,7 +1,7 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { GALLERY_PHOTOS, GalleryPhoto } from '@/src/data/fimfData';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { Maximize2, MapPin, Calendar, Plus } from 'lucide-react';
 import { Stagger, StaggerItem } from '../anim/Reveal';
 
@@ -35,11 +35,11 @@ export const GalerieView: React.FC<GalerieViewProps> = ({ onOpenPhotoLightbox })
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-30">
-          <img
-            src={heroImg}
+          <ResponsiveImage
+            name="hero_ivory_coast_minifootball_1790335944178.jpg"
             alt="Galerie Photos FIMF"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -94,11 +94,10 @@ export const GalerieView: React.FC<GalerieViewProps> = ({ onOpenPhotoLightbox })
               onClick={() => onOpenPhotoLightbox(idx)}
               className="fimf-card-lift group relative aspect-4/3 rounded-xl overflow-hidden bg-slate-900 shadow-2xs hover:shadow-lg cursor-pointer"
             >
-              <img
-                src={photo.image}
+              <ResponsiveImage
+                name={photo.image}
                 alt={photo.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                referrerPolicy="no-referrer"
               />
 
               {/* Scrim Overlay */}

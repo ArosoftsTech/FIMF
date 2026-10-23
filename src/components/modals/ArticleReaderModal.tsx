@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import { NewsArticle } from '@/src/data/fimfData';
 import { X, Calendar, User, Clock, Share2, Tag, Check, Copy } from 'lucide-react';
 
@@ -61,11 +62,11 @@ export const ArticleReaderModal: React.FC<ArticleReaderModalProps> = ({
         <div className="overflow-y-auto">
           {/* Article Image Banner */}
           <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-900">
-            <img
-              src={article.image}
+            <ResponsiveImage
+              name={article.image}
               alt={article.title}
               className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 text-white">

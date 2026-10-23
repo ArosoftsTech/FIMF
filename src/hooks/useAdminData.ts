@@ -16,6 +16,7 @@ import {
   HeroSlide,
 } from '../data/fimfData';
 import { supabase } from '../lib/supabaseClient';
+import { useToast } from '../components/ToastProvider';
 import * as api from '../lib/fimfApi';
 import type {
   FimfMembership,
@@ -248,6 +249,7 @@ export function useAdminData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Rôle de l'utilisateur connecté : 'admin' (fédéral) ou 'dirigeant' (restreint à son club)
+  const toast = useToast();
   const [membership, setMembership] = useState<FimfMembership | null>(null);
   const myRole: FimfRole | null = membership?.role ?? null;
   const myClubId = membership?.clubId ?? null;
@@ -323,10 +325,32 @@ export function useAdminData() {
     ]);
   }, []);
 
+  /**
+   * Écriture optimiste : si la base refuse l'opération (RLS, réseau),
+   * l'état local est restauré et l'administrateur est prévenu.
+   * Les erreurs ne sont plus avalées dans la console : elles remontent à l'écran.
+   */
+  const persist = useCallback(
+    (label: string, rollback: () => void, promise: Promise<unknown>, onSuccess?: () => void) => {
+      promise
+        .then(() => {
+          onSuccess?.();
+        })
+        .catch((e: unknown) => {
+          rollback();
+          const message = e instanceof Error ? e.message : String(e);
+          console.error(label, message);
+          toast.error(`Enregistrement refusé : ${label}`, message);
+        });
+    },
+    [toast],
+  );
+
   // ------------------------------------------------------------------
   // CLUBS
   // ------------------------------------------------------------------
   const saveClub = (club: Club) => {
+    const snapshot = clubs;
     setClubs((prev) => {
       const idx = prev.findIndex((c) => c.id === club.id);
       if (idx >= 0) {
@@ -336,23 +360,31 @@ export function useAdminData() {
       }
       return [club, ...prev];
     });
-    api.upsertClub(club)
-      .then(() => addLog('Mise à jour du club', club.name))
-      .catch((e) => console.error('saveClub:', e.message));
+    persist(
+      'club',
+      () => setClubs(snapshot),
+      api.upsertClub(club),
+      () => addLog('Mise à jour du club', club.name),
+    );
   };
 
   const deleteClub = (clubId: string) => {
+    const snapshot = clubs;
     const club = clubs.find((c) => c.id === clubId);
     setClubs((prev) => prev.filter((c) => c.id !== clubId));
-    api.deleteClubRow(clubId)
-      .then(() => addLog('Suppression de club', club?.name || clubId))
-      .catch((e) => console.error('deleteClub:', e.message));
+    persist(
+      'club',
+      () => setClubs(snapshot),
+      api.deleteClubRow(clubId),
+      () => addLog('Suppression de club', club?.name || clubId),
+    );
   };
 
   // ------------------------------------------------------------------
   // MATCHS
   // ------------------------------------------------------------------
   const saveMatch = (match: Match) => {
+    const snapshot = matches;
     setMatches((prev) => {
       const idx = prev.findIndex((m) => m.id === match.id);
       if (idx >= 0) {
@@ -362,22 +394,30 @@ export function useAdminData() {
       }
       return [match, ...prev];
     });
-    api.upsertMatch(match)
-      .then(() => addLog('Enregistrement du match', `${match.homeTeamId} vs ${match.awayTeamId}`))
-      .catch((e) => console.error('saveMatch:', e.message));
+    persist(
+      'match',
+      () => setMatches(snapshot),
+      api.upsertMatch(match),
+      () => addLog('Enregistrement du match', `${match.homeTeamId} vs ${match.awayTeamId}`),
+    );
   };
 
   const deleteMatch = (matchId: string) => {
+    const snapshot = matches;
     setMatches((prev) => prev.filter((m) => m.id !== matchId));
-    api.deleteMatchRow(matchId)
-      .then(() => addLog('Suppression de match', matchId))
-      .catch((e) => console.error('deleteMatch:', e.message));
+    persist(
+      'match',
+      () => setMatches(snapshot),
+      api.deleteMatchRow(matchId),
+      () => addLog('Suppression de match', matchId),
+    );
   };
 
   // ------------------------------------------------------------------
   // ACTUALITÉS
   // ------------------------------------------------------------------
   const saveNews = (article: NewsArticle) => {
+    const snapshot = news;
     setNews((prev) => {
       const idx = prev.findIndex((n) => n.id === article.id);
       if (idx >= 0) {
@@ -387,23 +427,31 @@ export function useAdminData() {
       }
       return [article, ...prev];
     });
-    api.upsertNewsArticle(article)
-      .then(() => addLog('Publication / Modification actualité', article.title))
-      .catch((e) => console.error('saveNews:', e.message));
+    persist(
+      'article',
+      () => setNews(snapshot),
+      api.upsertNewsArticle(article),
+      () => addLog('Publication / Modification actualité', article.title),
+    );
   };
 
   const deleteNews = (articleId: string) => {
+    const snapshot = news;
     const a = news.find((n) => n.id === articleId);
     setNews((prev) => prev.filter((n) => n.id !== articleId));
-    api.deleteNewsArticle(articleId)
-      .then(() => addLog('Suppression d\'actualité', a?.title || articleId))
-      .catch((e) => console.error('deleteNews:', e.message));
+    persist(
+      'article',
+      () => setNews(snapshot),
+      api.deleteNewsArticle(articleId),
+      () => addLog('Suppression d\'actualité', a?.title || articleId),
+    );
   };
 
   // ------------------------------------------------------------------
   // COMPÉTITIONS
   // ------------------------------------------------------------------
   const saveCompetition = (comp: Competition) => {
+    const snapshot = competitions;
     setCompetitions((prev) => {
       const idx = prev.findIndex((c) => c.id === comp.id);
       if (idx >= 0) {
@@ -413,23 +461,31 @@ export function useAdminData() {
       }
       return [comp, ...prev];
     });
-    api.upsertCompetition(comp)
-      .then(() => addLog('Mise à jour de compétition', comp.title))
-      .catch((e) => console.error('saveCompetition:', e.message));
+    persist(
+      'compétition',
+      () => setCompetitions(snapshot),
+      api.upsertCompetition(comp),
+      () => addLog('Mise à jour de compétition', comp.title),
+    );
   };
 
   const deleteCompetition = (compId: string) => {
+    const snapshot = competitions;
     const c = competitions.find((x) => x.id === compId);
     setCompetitions((prev) => prev.filter((x) => x.id !== compId));
-    api.deleteCompetitionRow(compId)
-      .then(() => addLog('Suppression de compétition', c?.title || compId))
-      .catch((e) => console.error('deleteCompetition:', e.message));
+    persist(
+      'compétition',
+      () => setCompetitions(snapshot),
+      api.deleteCompetitionRow(compId),
+      () => addLog('Suppression de compétition', c?.title || compId),
+    );
   };
 
   // ------------------------------------------------------------------
   // GALERIE
   // ------------------------------------------------------------------
   const saveGalleryPhoto = (photo: GalleryPhoto) => {
+    const snapshot = gallery;
     setGallery((prev) => {
       const idx = prev.findIndex((p) => p.id === photo.id);
       if (idx >= 0) {
@@ -439,23 +495,31 @@ export function useAdminData() {
       }
       return [photo, ...prev];
     });
-    api.upsertGalleryPhoto(photo)
-      .then(() => addLog('Ajout / Édition photo galerie', photo.title))
-      .catch((e) => console.error('saveGalleryPhoto:', e.message));
+    persist(
+      'photo de galerie',
+      () => setGallery(snapshot),
+      api.upsertGalleryPhoto(photo),
+      () => addLog('Ajout / Édition photo galerie', photo.title),
+    );
   };
 
   const deleteGalleryPhoto = (photoId: string) => {
+    const snapshot = gallery;
     const p = gallery.find((g) => g.id === photoId);
     setGallery((prev) => prev.filter((g) => g.id !== photoId));
-    api.deleteGalleryPhotoRow(photoId)
-      .then(() => addLog('Suppression photo galerie', p?.title || photoId))
-      .catch((e) => console.error('deleteGalleryPhoto:', e.message));
+    persist(
+      'photo de galerie',
+      () => setGallery(snapshot),
+      api.deleteGalleryPhotoRow(photoId),
+      () => addLog('Suppression photo galerie', p?.title || photoId),
+    );
   };
 
   // ------------------------------------------------------------------
   // SLIDES HERO (carrousel page d'accueil)
   // ------------------------------------------------------------------
   const saveHeroSlide = (slide: HeroSlide) => {
+    const snapshot = heroSlides;
     setHeroSlides((prev) => {
       const idx = prev.findIndex((s) => s.id === slide.id);
       if (idx >= 0) {
@@ -465,33 +529,45 @@ export function useAdminData() {
       }
       return [...prev, slide];
     });
-    api.upsertHeroSlide(slide)
-      .then(() => addLog('Enregistrement slide hero', slide.title))
-      .catch((e) => console.error('saveHeroSlide:', e.message));
+    persist(
+      'slide du hero',
+      () => setHeroSlides(snapshot),
+      api.upsertHeroSlide(slide),
+      () => addLog('Enregistrement slide hero', slide.title),
+    );
   };
 
   const deleteHeroSlide = (slideId: string) => {
+    const snapshot = heroSlides;
     const s = heroSlides.find((x) => x.id === slideId);
     setHeroSlides((prev) => prev.filter((x) => x.id !== slideId));
-    api.deleteHeroSlideRow(slideId)
-      .then(() => addLog('Suppression slide hero', s?.title || slideId))
-      .catch((e) => console.error('deleteHeroSlide:', e.message));
+    persist(
+      'slide du hero',
+      () => setHeroSlides(snapshot),
+      api.deleteHeroSlideRow(slideId),
+      () => addLog('Suppression slide hero', s?.title || slideId),
+    );
   };
 
   // ------------------------------------------------------------------
   // STATS
   // ------------------------------------------------------------------
   const saveStats = (newStats: typeof FIMF_STATS) => {
+    const snapshot = fimfStats;
     setFimfStats(newStats);
-    api.updateSiteStats(newStats)
-      .then(() => addLog('Actualisation des chiffres clés FIMF', 'Statistiques Fédérales'))
-      .catch((e) => console.error('saveStats:', e.message));
+    persist(
+      'statistiques',
+      () => setFimfStats(snapshot),
+      api.updateSiteStats(newStats),
+      () => addLog('Actualisation des chiffres clés FIMF', 'Statistiques Fédérales'),
+    );
   };
 
   // ------------------------------------------------------------------
   // PARTENAIRES
   // ------------------------------------------------------------------
   const savePartner = (partner: FimfPartner) => {
+    const snapshot = partners;
     setPartners((prev) => {
       const idx = prev.findIndex((p) => p.id === partner.id);
       if (idx >= 0) {
@@ -501,22 +577,30 @@ export function useAdminData() {
       }
       return [...prev, partner];
     });
-    api.upsertPartner(partner)
-      .then(() => addLog('Mise à jour partenaire', partner.name))
-      .catch((e) => console.error('savePartner:', e.message));
+    persist(
+      'partenaire',
+      () => setPartners(snapshot),
+      api.upsertPartner(partner),
+      () => addLog('Mise à jour partenaire', partner.name),
+    );
   };
 
   const deletePartner = (partnerId: string) => {
+    const snapshot = partners;
     setPartners((prev) => prev.filter((p) => p.id !== partnerId));
-    api.deletePartnerRow(partnerId)
-      .then(() => addLog('Suppression partenaire', partnerId))
-      .catch((e) => console.error('deletePartner:', e.message));
+    persist(
+      'partenaire',
+      () => setPartners(snapshot),
+      api.deletePartnerRow(partnerId),
+      () => addLog('Suppression partenaire', partnerId),
+    );
   };
 
   // ------------------------------------------------------------------
   // DIRIGEANTS
   // ------------------------------------------------------------------
   const saveOfficial = (official: FimfOfficial) => {
+    const snapshot = officials;
     setOfficials((prev) => {
       const idx = prev.findIndex((o) => o.id === official.id);
       if (idx >= 0) {
@@ -526,23 +610,31 @@ export function useAdminData() {
       }
       return [official, ...prev];
     });
-    api.upsertOfficial(official)
-      .then(() => addLog('Enregistrement / MAJ Dirigeant', `${official.role} - ${official.name}`))
-      .catch((e) => console.error('saveOfficial:', e.message));
+    persist(
+      'dirigeant',
+      () => setOfficials(snapshot),
+      api.upsertOfficial(official),
+      () => addLog('Enregistrement / MAJ Dirigeant', `${official.role} - ${official.name}`),
+    );
   };
 
   const deleteOfficial = (officialId: string) => {
+    const snapshot = officials;
     const off = officials.find((o) => o.id === officialId);
     setOfficials((prev) => prev.filter((o) => o.id !== officialId));
-    api.deleteOfficialRow(officialId)
-      .then(() => addLog('Suppression Dirigeant fédéral', off?.name || officialId))
-      .catch((e) => console.error('deleteOfficial:', e.message));
+    persist(
+      'dirigeant',
+      () => setOfficials(snapshot),
+      api.deleteOfficialRow(officialId),
+      () => addLog('Suppression Dirigeant fédéral', off?.name || officialId),
+    );
   };
 
   // ------------------------------------------------------------------
   // COMMISSIONS
   // ------------------------------------------------------------------
   const saveCommission = (comm: FimfCommission) => {
+    const snapshot = commissions;
     setCommissions((prev) => {
       const idx = prev.findIndex((c) => c.id === comm.id);
       if (idx >= 0) {
@@ -552,43 +644,59 @@ export function useAdminData() {
       }
       return [...prev, comm];
     });
-    api.upsertCommission(comm)
-      .then(() => addLog('Mise à jour commission', comm.name))
-      .catch((e) => console.error('saveCommission:', e.message));
+    persist(
+      'commission',
+      () => setCommissions(snapshot),
+      api.upsertCommission(comm),
+      () => addLog('Mise à jour commission', comm.name),
+    );
   };
 
   const deleteCommission = (commId: string) => {
+    const snapshot = commissions;
     const c = commissions.find((item) => item.id === commId);
     setCommissions((prev) => prev.filter((item) => item.id !== commId));
-    api.deleteCommissionRow(commId)
-      .then(() => addLog('Suppression commission', c?.name || commId))
-      .catch((e) => console.error('deleteCommission:', e.message));
+    persist(
+      'commission',
+      () => setCommissions(snapshot),
+      api.deleteCommissionRow(commId),
+      () => addLog('Suppression commission', c?.name || commId),
+    );
   };
 
   // ------------------------------------------------------------------
   // DEMANDES DE SPONSORING
   // ------------------------------------------------------------------
   const updateSponsorStatus = (id: number, status: SponsorRequestStatus) => {
+    const snapshot = sponsorRequests;
     setSponsorRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-    api.updateSponsorRequestStatus(id, status)
-      .then(() => addLog('Statut demande sponsoring', `#${id} → ${status}`))
-      .catch((e) => console.error('updateSponsorStatus:', e.message));
+    persist(
+      'demande de sponsoring',
+      () => setSponsorRequests(snapshot),
+      api.updateSponsorRequestStatus(id, status),
+      () => addLog('Statut demande sponsoring', `#${id} → ${status}`),
+    );
   };
 
   // ------------------------------------------------------------------
   // DEMANDES D'ADHÉSION
   // ------------------------------------------------------------------
   const updateMemberStatus = (id: number, status: MemberRequestStatus) => {
+    const snapshot = memberRequests;
     setMemberRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-    api.updateMemberRequestStatus(id, status)
-      .then(() => addLog('Statut demande adhésion', `#${id} → ${status}`))
-      .catch((e) => console.error('updateMemberStatus:', e.message));
+    persist(
+      'demande d\'adhésion',
+      () => setMemberRequests(snapshot),
+      api.updateMemberRequestStatus(id, status),
+      () => addLog('Statut demande adhésion', `#${id} → ${status}`),
+    );
   };
 
   // ------------------------------------------------------------------
   // RÉINITIALISATION
   // ------------------------------------------------------------------
   const resetToFactoryDefaults = () => {
+    const snapshot = { clubs, matches, news, competitions, gallery, fimfStats, partners, officials, commissions };
     setClubs(CLUBS_DATA);
     setMatches(MATCHES_DATA);
     setNews(NEWS_DATA);
@@ -598,19 +706,32 @@ export function useAdminData() {
     setPartners(PARTNERS);
     setOfficials(DEFAULT_OFFICIALS);
     setCommissions(DEFAULT_COMMISSIONS);
-    api.resetAllToDefaults({
-      clubs: CLUBS_DATA,
-      matches: MATCHES_DATA,
-      news: NEWS_DATA,
-      competitions: COMPETITIONS_DATA,
-      gallery: GALLERY_PHOTOS,
-      stats: FIMF_STATS,
-      partners: PARTNERS,
-      officials: DEFAULT_OFFICIALS,
-      commissions: DEFAULT_COMMISSIONS,
-    })
-      .then(() => addLog('Réinitialisation complète', 'Données par défaut rétablies'))
-      .catch((e) => console.error('resetToFactoryDefaults:', e.message));
+    persist(
+      'réinitialisation',
+      () => {
+        setClubs(snapshot.clubs);
+        setMatches(snapshot.matches);
+        setNews(snapshot.news);
+        setCompetitions(snapshot.competitions);
+        setGallery(snapshot.gallery);
+        setFimfStats(snapshot.fimfStats);
+        setPartners(snapshot.partners);
+        setOfficials(snapshot.officials);
+        setCommissions(snapshot.commissions);
+      },
+      api.resetAllToDefaults({
+        clubs: CLUBS_DATA,
+        matches: MATCHES_DATA,
+        news: NEWS_DATA,
+        competitions: COMPETITIONS_DATA,
+        gallery: GALLERY_PHOTOS,
+        stats: FIMF_STATS,
+        partners: PARTNERS,
+        officials: DEFAULT_OFFICIALS,
+        commissions: DEFAULT_COMMISSIONS,
+      }),
+      () => addLog('Réinitialisation complète', 'Données par défaut rétablies'),
+    );
   };
 
   // Un dirigeant ne gère que SON club : on restreint la liste affichée.

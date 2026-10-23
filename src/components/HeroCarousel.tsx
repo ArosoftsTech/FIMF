@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { HeroSlide } from '@/src/data/fimfData';
 import { mediaUrl } from '../lib/fimfApi';
+import { resolveBundledHeroName } from '@/src/lib/heroImages';
+import { ResponsiveImage } from './ResponsiveImage';
 import type { NavPage } from './Navbar';
 import { ANIM, useMouseParallax, useScrollParallax } from '@/src/lib/anim';
 import {
@@ -94,14 +96,32 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ slides, onNavigate }
           }`}
           aria-hidden={i !== index}
         >
-          <img
-            src={mediaUrl(s.image)}
-            alt={s.title}
-            className={`fimf-hero-kenburns w-full h-full object-cover object-center scale-102 transition-transform duration-[7000ms] ease-out ${
-              i === index ? 'scale-110' : 'scale-102'
-            }`}
-            referrerPolicy="no-referrer"
-          />
+          {/* Image de fond : servie depuis le bundle local (WebP + srcset) quand
+              elle correspond aux images d'origine du site — c'est l'image LCP
+              de la page d'accueil, elle pesait ~950 Ko en pleine résolution.
+              Les images téléversées par l'admin restent servies par le bucket. */}
+          {resolveBundledHeroName(s.image) ? (
+            <ResponsiveImage
+              name={s.image}
+              alt={s.title}
+              className={`fimf-hero-kenburns w-full h-full object-cover object-center scale-102 transition-transform duration-[7000ms] ease-out ${
+                i === index ? 'scale-110' : 'scale-102'
+              }`}
+              priority={i === 0 || i === index}
+            />
+          ) : (
+            <img
+              src={mediaUrl(s.image)}
+              alt={s.title}
+              className={`fimf-hero-kenburns w-full h-full object-cover object-center scale-102 transition-transform duration-[7000ms] ease-out ${
+                i === index ? 'scale-110' : 'scale-102'
+              }`}
+              loading={i === index ? 'eager' : 'lazy'}
+              fetchPriority={i === index ? 'high' : 'auto'}
+              decoding="async"
+              referrerPolicy="no-referrer"
+            />
+          )}
           {/* Measured gradient scrim */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/35" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />

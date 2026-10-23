@@ -309,6 +309,38 @@ python tools/optimize-hero-images.py   # régénère les variantes d'images (Pil
 `member_requests` échoue (colonne `password` absente). L'étape 1 bis est indépendante : elle peut
 être appliquée à tout moment, avant ou après le déploiement.
 
+### Publier une actualité
+
+Deux sources alimentent le site, et il faut les distinguer avant de publier :
+
+- l'onglet **Actualités** (`ActualitesView`) et les pages article lisent le jeu de données embarqué
+  `NEWS_DATA` (`src/data/fimfData.ts`) ;
+- l'accueil (« à la une »), le dashboard admin et le carrousel lisent la table `news_articles`
+  dès qu'elle n'est pas vide (`fetchNews()`, tri `timestamp` décroissant).
+
+**Depuis le dashboard** (onglet « Presse & Médias ») : l'article est écrit dans `news_articles` et
+l'accueil se rafraîchit en temps réel (publication Realtime sur cette table).
+
+**En lot ou de façon reproductible** :
+
+```bash
+SBP=<token-management> node supabase/run-sql.mjs supabase/migrate-news-can-2026.sql
+```
+
+Le script est idempotent (`insert … on conflict (id) do update`) : le rejouer ne crée pas de
+doublon et réapplique le texte de référence — il **écrase** donc une retouche faite ensuite dans le
+dashboard sur les mêmes `id`. Sa seconde section met à jour la slide `hero-2` du carrousel ; elle est
+ignorée si `hero_slides` n'existe pas encore (`hero-slides.sql` à appliquer), pour ne pas annuler la
+publication des actualités dans la même transaction.
+
+**Images** : indiquer un nom de fichier du registre `src/assets/images` (ex.
+`team_huddle_elephants_1790335968616.jpg`) ou une URL complète du bucket `fimf-media`. `mediaRef()`
+ne conserve que la référence, `mediaUrl()` la résout à la lecture ; une URL `http` reste intacte.
+
+**Vérification** : la lecture de `news_articles` est publique (`anon`). Un `select` anonyme sur les
+`id` publiés suffit à confirmer que le contenu est bien visible par les visiteurs, sans ouvrir de
+session administrateur.
+
 **À faire par l'exploitant** (hors dépôt) :
 
 1. Le mot de passe `admin@fimf.ci` a été réinitialisé et ses autres sessions révoquées. Restent à

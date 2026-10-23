@@ -59,13 +59,13 @@ values
   (
     'hero-2',
     'CAN MINI FOOTBALL',
-    'GUINÉE 2027',
-    'Coup d''envoi le 09 janvier 2027 à Conakry : les Éléphants, champions d''Afrique 2018, visent un second titre continental.',
+    'TIRAGE CONNU',
+    'Les Éléphants héritent du groupe D avec le Tchad, le Mali et le Soudan du Sud. Rendez-vous à Conakry du 09 au 24 janvier 2027.',
     'team_huddle_elephants_1790335968616.jpg',
-    'LES ÉCHÉANCES',
-    'la-fimf',
-    'LA SÉLECTION',
+    'TOUS LES GROUPES',
     'competitions',
+    'LIRE L''ACTUALITÉ',
+    'actualites',
     2,
     true
   ),

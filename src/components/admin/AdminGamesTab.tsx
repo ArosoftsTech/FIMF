@@ -42,7 +42,7 @@ import {
 type SubTab = 'periods' | 'prizes' | 'draws';
 
 interface AdminGamesTabProps {
-  showFeedback: (msg: string) => void;
+  showFeedback: (msg: string, tone?: 'success' | 'error') => void;
 }
 
 /** Valeur datetime-local depuis un ISO. */
@@ -80,7 +80,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       setPrizes(pz);
       setDraws(dr);
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Chargement impossible');
+      showFeedback(e instanceof Error ? e.message : 'Chargement impossible', 'error');
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       const rows = await adminFetchPeriodLeaderboard(periodId);
       setLeaderboard((prev) => ({ ...prev, [periodId]: rows }));
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Classement indisponible');
+      showFeedback(e instanceof Error ? e.message : 'Classement indisponible', 'error');
     }
   };
 
@@ -104,7 +104,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       const w = await fetchDrawWinners(drawId);
       setWinners((prev) => ({ ...prev, [drawId]: w }));
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Gagnants indisponibles');
+      showFeedback(e instanceof Error ? e.message : 'Gagnants indisponibles', 'error');
     }
   };
 
@@ -120,7 +120,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       await load();
       void openWinners(draw.id);
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Tirage impossible');
+      showFeedback(e instanceof Error ? e.message : 'Tirage impossible', 'error');
     } finally {
       setBusy(false);
     }
@@ -133,7 +133,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       showFeedback(`${n} pronostic(s) évalué(s).`);
       void openLeaderboard(periodId);
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Évaluation impossible');
+      showFeedback(e instanceof Error ? e.message : 'Évaluation impossible', 'error');
     } finally {
       setBusy(false);
     }
@@ -141,7 +141,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
 
   const savePeriod = async () => {
     if (!editingPeriod?.name || !editingPeriod.startsAt || !editingPeriod.endsAt) {
-      showFeedback('Nom, début et fin obligatoires');
+      showFeedback('Nom, début et fin obligatoires', 'error');
       return;
     }
     setBusy(true);
@@ -158,7 +158,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       setEditingPeriod(null);
       await load();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Enregistrement impossible');
+      showFeedback(e instanceof Error ? e.message : 'Enregistrement impossible', 'error');
     } finally {
       setBusy(false);
     }
@@ -166,7 +166,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
 
   const savePrize = async () => {
     if (!editingPrize?.label || !editingPrize.periodId) {
-      showFeedback('Intitulé et période obligatoires');
+      showFeedback('Intitulé et période obligatoires', 'error');
       return;
     }
     setBusy(true);
@@ -190,7 +190,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       setPrizeImageFile(null);
       await load();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Enregistrement impossible');
+      showFeedback(e instanceof Error ? e.message : 'Enregistrement impossible', 'error');
     } finally {
       setBusy(false);
     }
@@ -198,7 +198,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
 
   const saveDraw = async () => {
     if (!editingDraw?.title) {
-      showFeedback('Titre obligatoire');
+      showFeedback('Titre obligatoire', 'error');
       return;
     }
     setBusy(true);
@@ -215,7 +215,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       setEditingDraw(null);
       await load();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Enregistrement impossible');
+      showFeedback(e instanceof Error ? e.message : 'Enregistrement impossible', 'error');
     } finally {
       setBusy(false);
     }
@@ -228,7 +228,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       showFeedback('Période supprimée');
       await load();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Suppression impossible');
+      showFeedback(e instanceof Error ? e.message : 'Suppression impossible', 'error');
     }
   };
 
@@ -239,7 +239,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       showFeedback('Lot supprimé');
       await load();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Suppression impossible');
+      showFeedback(e instanceof Error ? e.message : 'Suppression impossible', 'error');
     }
   };
 
@@ -250,7 +250,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
       showFeedback('Tirage supprimé');
       await load();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Suppression impossible');
+      showFeedback(e instanceof Error ? e.message : 'Suppression impossible', 'error');
     }
   };
 
@@ -845,7 +845,7 @@ export const AdminGamesTab: React.FC<AdminGamesTabProps> = ({ showFeedback }) =>
  */
 const WinnersAdminInline: React.FC<{
   winners: DrawWinnerPublic[];
-  showFeedback: (msg: string) => void;
+  showFeedback: (msg: string, tone?: 'success' | 'error') => void;
   onChanged: () => void;
 }> = ({ winners, showFeedback, onChanged }) => {
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -859,7 +859,7 @@ const WinnersAdminInline: React.FC<{
       showFeedback('Photo du gagnant mise à jour');
       onChanged();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Téléversement impossible');
+      showFeedback(e instanceof Error ? e.message : 'Téléversement impossible', 'error');
     } finally {
       setBusyId(null);
     }
@@ -872,7 +872,7 @@ const WinnersAdminInline: React.FC<{
       showFeedback('Photo supprimée');
       onChanged();
     } catch (e) {
-      showFeedback(e instanceof Error ? e.message : 'Suppression impossible');
+      showFeedback(e instanceof Error ? e.message : 'Suppression impossible', 'error');
     } finally {
       setBusyId(null);
     }

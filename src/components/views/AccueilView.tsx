@@ -1,3 +1,4 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { NavPage } from '../Navbar';
@@ -22,8 +23,6 @@ import { Counter } from '../anim/Counter';
 import { PronosticsModule } from '../PronosticsModule';
 import { WinnersShowcase } from '../WinnersShowcase';
 import { HeroCarousel } from '../HeroCarousel';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
-import huddleImg from '@/src/assets/images/team_huddle_elephants_1790335968616.jpg';
 import {
   Calendar,
   MapPin,
@@ -279,11 +278,10 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12">
             {/* Bloc compte à rebours CAN Guinée 2027 */}
             <div className="lg:col-span-5 relative overflow-hidden bg-[#004724] text-white p-6 sm:p-8 flex flex-col justify-between min-h-[260px]">
-              <img
-                src={huddleImg}
+              <ResponsiveImage
+                name="team_huddle_elephants_1790335968616.jpg"
                 alt="Sélection nationale"
                 className="absolute inset-0 w-full h-full object-cover opacity-20"
-                referrerPolicy="no-referrer"
               />
               <div className="relative">
                 <div className="flex items-center gap-2">
@@ -359,11 +357,10 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                   className="fimf-card-lift group bg-white rounded-lg border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md cursor-pointer flex flex-col sm:flex-col h-full"
                 >
                   <div className="relative h-40 w-full overflow-hidden bg-slate-900">
-                    <img
-                      src={article.image}
+                    <ResponsiveImage
+                      name={article.image}
                       alt={article.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      referrerPolicy="no-referrer"
                     />
                     <span className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-[#004724]/90 text-white text-[10px] font-bold rounded">
                       {article.category}
@@ -550,11 +547,10 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                   className="fimf-card-lift group bg-white rounded-lg border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md cursor-pointer flex items-center p-3 gap-3.5"
                 >
                   <div className="w-20 h-20 rounded-md overflow-hidden bg-slate-900 shrink-0">
-                    <img
-                      src={comp.image}
+                    <ResponsiveImage
+                      name={comp.image}
                       alt={comp.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      referrerPolicy="no-referrer"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -890,11 +886,10 @@ export const AccueilView: React.FC<AccueilViewProps> = ({
                   onClick={() => onOpenPhotoLightbox(idx)}
                   className="group relative aspect-square rounded-lg overflow-hidden bg-slate-900 cursor-pointer shadow-2xs hover:shadow-md transition-shadow"
                 >
-                  <img
-                    src={photo.image}
+                  <ResponsiveImage
+                    name={photo.image}
                     alt={photo.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
                     <span className="text-[10px] font-bold uppercase px-1 text-center">Zoom</span>

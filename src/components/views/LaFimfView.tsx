@@ -1,7 +1,5 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState, useEffect } from 'react';
-import hqImg from '@/src/assets/images/fimf_headquarters_building_1790335956733.jpg';
-import huddleImg from '@/src/assets/images/team_huddle_elephants_1790335968616.jpg';
-import refereeImg from '@/src/assets/images/referee_training_session_1790335992555.jpg';
 import {
   FileText,
   Users,
@@ -288,11 +286,11 @@ export const LaFimfView: React.FC<LaFimfViewProps> = ({ onOpenClubSpace, onNavig
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-25">
-          <img
-            src={hqImg}
+          <ResponsiveImage
+            name="fimf_headquarters_building_1790335956733.jpg"
             alt="Siège de la FIMF"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -376,11 +374,10 @@ export const LaFimfView: React.FC<LaFimfViewProps> = ({ onOpenClubSpace, onNavig
 
                     <div className="md:col-span-5">
                       <div className="relative rounded-lg overflow-hidden shadow-sm aspect-4/3 bg-slate-900">
-                        <img
-                          src={huddleImg}
+                        <ResponsiveImage
+                          name="team_huddle_elephants_1790335968616.jpg"
                           alt="Équipe FIMF"
                           className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
                         />
                       </div>
                     </div>
@@ -784,11 +781,10 @@ export const LaFimfView: React.FC<LaFimfViewProps> = ({ onOpenClubSpace, onNavig
                     </p>
                   </div>
                   <div className="md:col-span-5">
-                    <img
-                      src={refereeImg}
+                    <ResponsiveImage
+                      name="referee_training_session_1790335992555.jpg"
                       alt="Formation des arbitres"
                       className="rounded-lg shadow-sm w-full object-cover"
-                      referrerPolicy="no-referrer"
                     />
                   </div>
                 </div>

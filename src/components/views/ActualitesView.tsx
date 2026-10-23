@@ -1,7 +1,7 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { NEWS_DATA, NewsArticle } from '@/src/data/fimfData';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { ArrowRight, Calendar, Tag, Clock } from 'lucide-react';
 import { Stagger, StaggerItem } from '../anim/Reveal';
 
@@ -39,11 +39,11 @@ export const ActualitesView: React.FC<ActualitesViewProps> = ({ onSelectArticle 
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-30">
-          <img
-            src={heroImg}
+          <ResponsiveImage
+            name="hero_ivory_coast_minifootball_1790335944178.jpg"
             alt="Actualités de la FIMF"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
@@ -97,11 +97,10 @@ export const ActualitesView: React.FC<ActualitesViewProps> = ({ onSelectArticle 
             >
               <div>
                 <div className="relative h-48 w-full overflow-hidden bg-slate-900">
-                  <img
-                    src={article.image}
+                  <ResponsiveImage
+                    name={article.image}
                     alt={article.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    referrerPolicy="no-referrer"
                   />
                   <span className="absolute top-3 left-3 px-2.5 py-1 bg-[#004724]/90 text-white text-[10px] font-bold rounded uppercase">
                     {article.category}

@@ -1,10 +1,10 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { CLUBS_DATA, TOP_SCORERS, TOP_ASSISTS, Club } from '@/src/data/fimfData';
 import { useFimfData } from '../../context/FimfDataContext';
 import { ClubBadge } from '../ClubBadge';
 import { Reveal } from '../anim/Reveal';
-import heroImg from '@/src/assets/images/hero_ivory_coast_minifootball_1790335944178.jpg';
 import { ChevronDown, Trophy, Target, Award, ArrowUpRight } from 'lucide-react';
 
 interface ClassementViewProps {
@@ -39,11 +39,11 @@ export const ClassementView: React.FC<ClassementViewProps> = ({ onSelectClub }) 
       {/* 1. HERO BANNER */}
       <section className="relative overflow-hidden bg-[#004724] text-white">
         <div className="absolute inset-0 opacity-30">
-          <img
-            src={heroImg}
+          <ResponsiveImage
+            name="hero_ivory_coast_minifootball_1790335944178.jpg"
             alt="Classement du Championnat National"
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
+            priority
           />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">

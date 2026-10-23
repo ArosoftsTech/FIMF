@@ -1,3 +1,4 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React from 'react';
 import { Competition } from '@/src/data/fimfData';
 import { X, Trophy, Users, Calendar, ShieldCheck, Check } from 'lucide-react';
@@ -20,11 +21,10 @@ export const CompetitionModal: React.FC<CompetitionModalProps> = ({
       <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 animate-modal-in max-h-[90vh] flex flex-col">
         {/* Header Image */}
         <div className="relative h-48 sm:h-56 bg-slate-900 overflow-hidden shrink-0">
-          <img
-            src={competition.image}
+          <ResponsiveImage
+            name={competition.image}
             alt={competition.title}
             className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
 

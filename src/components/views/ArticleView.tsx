@@ -1,3 +1,4 @@
+import { ResponsiveImage } from '@/src/components/ResponsiveImage';
 import React, { useState } from 'react';
 import { ArrowLeft, Calendar, User, Clock, Share2, Tag, Check, Copy, ChevronRight, Newspaper } from 'lucide-react';
 import { NewsArticle } from '@/src/data/fimfData';
@@ -76,11 +77,10 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
       {/* Bannière image */}
       <div className="relative h-64 sm:h-80 md:h-[420px] w-full overflow-hidden bg-slate-900">
-        <img
-          src={article.image}
+        <ResponsiveImage
+          name={article.image}
           alt={article.title}
           className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
         <div className="absolute bottom-6 left-0 right-0">
@@ -244,11 +244,10 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
                   className="text-left bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md hover:border-slate-300 transition-all cursor-pointer group"
                 >
                   <div className="h-32 overflow-hidden bg-slate-100">
-                    <img
-                      src={r.image}
+                    <ResponsiveImage
+                      name={r.image}
                       alt={r.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      referrerPolicy="no-referrer"
                     />
                   </div>
                   <div className="p-3.5">

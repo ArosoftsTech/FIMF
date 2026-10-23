@@ -21,9 +21,10 @@ const supabaseAnon = createClient(
   Deno.env.get('SUPABASE_ANON_KEY')!,
 );
 
-/** Client service_role (contournement RLS) — requis pour lire les contrats. */
+/** Client service_role (contournement RLS) — requis pour lire les contrats.
+ *  Le nom de la variable accepte SUPABASE_SERVICE_ROLE_KEY ou SERVICE_ROLE_KEY. */
 function serviceClient() {
-  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SERVICE_ROLE_KEY');
   if (!key) return null;
   return createClient(Deno.env.get('SUPABASE_URL')!, key);
 }

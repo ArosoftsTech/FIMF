@@ -9,7 +9,8 @@
 // a été supprimée (voir supabase/security-hardening.sql). Le membre choisit son
 // mot de passe via le lien reçu, qui expire.
 //
-// Secrets : RESEND_API_KEY, WEBHOOK_SECRET, + injectés : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+// Secrets : RESEND_API_KEY, WEBHOOK_SECRET, + injectés : SUPABASE_URL et
+// SUPABASE_SERVICE_ROLE_KEY (ou SERVICE_ROLE_KEY — l'un des deux suffit).
 // Optionnels : RESEND_FROM, SITE_URL.
 // Déploiement : SBP=<token> node supabase/deploy-function.mjs member-activate
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -73,7 +74,8 @@ Deno.serve(async (req) => {
     //    définit le sien via le lien de récupération ci-dessous.
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ??
+        Deno.env.get('SERVICE_ROLE_KEY')!,
       { auth: { autoRefreshToken: false, persistSession: false } },
     );
 

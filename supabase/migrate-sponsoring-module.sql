@@ -128,7 +128,8 @@ alter table public.sponsor_requests
   add column if not exists last_activity_at timestamptz not null default now();
 
 -- Statuts élargis (les anciennes valeurs 'en cours' / 'signée' restent lisibles)
-drop constraint if exists chk_sponsor_requests_status on public.sponsor_requests;
+alter table public.sponsor_requests
+  drop constraint if exists chk_sponsor_requests_status;
 alter table public.sponsor_requests
   add constraint chk_sponsor_requests_status
   check (status in ('nouvelle','en cours','contactée','en négociation',

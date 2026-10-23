@@ -341,6 +341,49 @@ ne conserve que la référence, `mediaUrl()` la résout à la lecture ; une URL 
 `id` publiés suffit à confirmer que le contenu est bien visible par les visiteurs, sans ouvrir de
 session administrateur.
 
+### Déploiement Vercel
+
+Le frontend est hébergé sur Vercel (projet `fimf`, production : `https://fimf.vercel.app`) et relié
+au dépôt GitHub `ArosoftsTech/FIMF` : **tout push sur `main` déclenche un déploiement de
+production**, et chaque branche produit une preview.
+
+`vercel.json` fige ce que le dashboard ne doit pas avoir à redeviner :
+
+| Réglage | Valeur |
+|---|---|
+| Framework | `vite` |
+| Build | `npm run build` |
+| Dossier de sortie | `dist` |
+| Routage | réécriture de toutes les routes vers `index.html` (SPA) |
+| Cache | `assets/*` immuable un an, `index.html` revalidé à chaque visite |
+
+**Variables d'environnement** (Vercel → Project Settings → Environment Variables, à définir pour
+**Production** et **Preview**) :
+
+```
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<clé anon / publishable>
+```
+
+Elles sont intégrées au bundle à la compilation : les modifier impose un **redéploiement** (les
+variables d'exécution ne suffisent pas). Ne jamais ajouter `SUPABASE_SECRET_KEY` / `service_role`
+ni de token de management : tout ce qui est `VITE_*` est public. `GEMINI_API_KEY` et `APP_URL` du
+template `.env.example` ne sont pas utilisés par l'application.
+
+Sans ces deux variables, `supabaseClient.ts` refuse de démarrer (message explicite dans la
+console) : c'est le premier symptôme d'un déploiement mal configuré.
+
+**Déploiement manuel** (hors intégration Git) :
+
+```bash
+npx vercel --prod          # après « vercel login », ou avec VERCEL_TOKEN=… en CI
+```
+
+**Vérification après déploiement** : la page d'accueil doit répondre `200` et le bundle référencé
+dans `index.html` doit contenir les derniers libellés publiés (`curl -s https://<domaine>/ | grep
+-oE 'assets/index-[^"]+\.js'`). L'ancien bundle restant servi signale un déploiement non promu ou
+un cache de navigateur.
+
 **À faire par l'exploitant** (hors dépôt) :
 
 1. Le mot de passe `admin@fimf.ci` a été réinitialisé et ses autres sessions révoquées. Restent à

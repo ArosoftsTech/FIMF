@@ -131,6 +131,20 @@ export const CalendrierView: React.FC<CalendrierViewProps> = ({
     });
   }, [selectedCompetitionId, selectedStatus, selectedDateFilter, onlyFavorites, searchTerm, favoriteIds]);
 
+  // Groupes de la CAN, lus sur la fiche compétition (tirage au sort de Conakry)
+  const canGroups = useMemo(() => {
+    const can = COMPETITIONS_DATA.find((c) => c.id === 'can-guinee-2027');
+    return (can?.rulesHighlight ?? [])
+      .filter((line) => /^Groupe [A-F] —/.test(line))
+      .map((line) => {
+        const [label, teams] = line.split(' — ');
+        return {
+          letter: label.replace('Groupe ', ''),
+          teams: teams.split(/,\s*|\s\+\s/).filter(Boolean),
+        };
+      });
+  }, []);
+
   // Grouped by Date
   const matchesByDate = useMemo(() => {
     const groups: { [dateStr: string]: Match[] } = {};
@@ -372,7 +386,83 @@ export const CalendrierView: React.FC<CalendrierViewProps> = ({
         </Reveal>
       </section>
 
-      {/* 3. MATCHES LIST OR EMPTY STATE */}
+      {/* 3. PHASE DE GROUPES — CAN MINI FOOTBALL GUINÉE 2027 */}
+      {canGroups.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-9 h-9 rounded-lg bg-[#004724] text-white flex items-center justify-center shrink-0">
+                    <Trophy className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">
+                      Phase de groupes — CAN Mini Football Guinée 2027
+                    </h2>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Tirage au sort de Conakry · 24 nations · 6 groupes · 09 – 24 janvier 2027
+                    </p>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 text-[#ea580c] border border-orange-200 text-[10px] font-black uppercase tracking-wider self-start sm:self-auto shrink-0">
+                  <Sparkles className="w-3 h-3" />
+                  Groupe D : les Éléphants
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4 sm:p-6">
+                {canGroups.map((group) => (
+                  <div
+                    key={group.letter}
+                    className={`rounded-xl border p-3 ${
+                      group.letter === 'D'
+                        ? 'border-[#ea580c]/40 bg-orange-50/50'
+                        : 'border-slate-200 bg-slate-50/60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+                        Groupe {group.letter}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400">
+                        {group.teams.length} équipes
+                      </span>
+                    </div>
+                    <ul className="space-y-1">
+                      {group.teams.map((team) => {
+                        const isElephants = team === "Côte d'Ivoire";
+                        const isWildCard = team.toLowerCase().includes('wild card');
+                        return (
+                          <li
+                            key={team}
+                            className={`flex items-center gap-2 text-xs ${
+                              isElephants
+                                ? 'font-black text-[#004724]'
+                                : 'font-semibold text-slate-700'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                isElephants ? 'bg-[#ea580c]' : 'bg-slate-300'
+                              }`}
+                            />
+                            <span className={isWildCard ? 'italic text-slate-500' : ''}>
+                              {isWildCard ? 'Wild card (à désigner)' : team}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </section>
+      )}
+
+      {/* 4. MATCHES LIST OR EMPTY STATE */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {filteredMatches.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-lg mx-auto shadow-2xs">

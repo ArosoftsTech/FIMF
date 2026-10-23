@@ -50,6 +50,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <button onClick={() => onNavigate('galerie')} className="hover:text-amber-400 transition-colors">GALERIE</button>
             <span className="text-emerald-700 select-none">|</span>
             <button onClick={() => onNavigate('contact')} className="hover:text-amber-400 transition-colors">CONTACT</button>
+            <span className="text-emerald-700 select-none">|</span>
+            <button onClick={() => onNavigate('sponsoring')} className="hover:text-amber-400 transition-colors font-bold">SPONSORING</button>
           </nav>
 
           {/* Social Icons */}

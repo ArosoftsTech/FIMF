@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ANIM } from './lib/anim';
 import { Navbar, NavPage, NavTarget } from './components/Navbar';
@@ -14,6 +14,7 @@ import { ActualitesView } from './components/views/ActualitesView';
 import { ArticleView } from './components/views/ArticleView';
 import { GalerieView } from './components/views/GalerieView';
 import { ContactView } from './components/views/ContactView';
+import { SponsoringView } from './components/views/SponsoringView';
 import { AdminDashboardView } from './components/views/AdminDashboardView';
 import { MemberAreaView } from './components/views/MemberAreaView';
 import { UserRound } from 'lucide-react';
@@ -23,7 +24,6 @@ import { ClubProfileModal } from './components/modals/ClubProfileModal';
 import { ArticleReaderModal } from './components/modals/ArticleReaderModal';
 import { PhotoLightboxModal } from './components/modals/PhotoLightboxModal';
 import { EspaceClubModal } from './components/modals/EspaceClubModal';
-import { SponsoringModal } from './components/modals/SponsoringModal';
 import { AuthChoiceModal } from './components/modals/AuthChoiceModal';
 import { GlobalSearchModal } from './components/modals/GlobalSearchModal';
 import { CompetitionModal } from './components/modals/CompetitionModal';
@@ -44,6 +44,11 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { FimfDataProvider, useFimfData } from './context/FimfDataContext';
 import { AdminLoginView } from './components/AdminLoginView';
 import { BackToTopButton } from './components/BackToTopButton';
+import {
+  applyPageMeta,
+  pushNavigationUrl,
+  resolveNavigationFromUrl,
+} from './lib/router';
 
 export default function App() {
   return (
@@ -158,9 +163,12 @@ function MemberAreaGate({
 }
 
 function AppInner() {
-  const [currentPage, setCurrentPage] = useState<NavPage>('accueil');
+  // Page courante initialisée DEPUIS l'URL (deep link : /sponsoring, /contact…)
+  const [currentPage, setCurrentPage] = useState<NavPage>(() => resolveNavigationFromUrl().page);
   // Sous-onglet demandé par navigation profonde (menu déroulant) — consommé par la vue cible
-  const [pendingSubTab, setPendingSubTab] = useState<string | undefined>(undefined);
+  const [pendingSubTab, setPendingSubTab] = useState<string | undefined>(
+    () => resolveNavigationFromUrl().subTab,
+  );
   const { user, loading: authLoading } = useAuth();
   const { clubs: liveClubs, gallery: liveGallery, news: liveNews } = useFimfData();
   const { favoriteIds, favoriteClubs, isFavorite, toggleFavorite } = useFavoriteClubs();
@@ -183,12 +191,17 @@ function AppInner() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isClubSpaceOpen, setIsClubSpaceOpen] = useState(false);
-  const [isSponsoringOpen, setIsSponsoringOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  const handleNavigate = (page: NavPage) => {
+  /** Navigation commutant aussi l'URL (route propre : /sponsoring, /contact…). */
+  const switchPage = (page: NavPage, subTab?: string) => {
+    pushNavigationUrl(page, subTab);
     setCurrentPage(page);
-    setPendingSubTab(undefined);
+    setPendingSubTab(subTab);
+  };
+
+  const handleNavigate = (page: NavPage) => {
+    switchPage(page);
     if (page !== 'article') setPageArticle(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -209,10 +222,26 @@ function AppInner() {
 
   /** Navigation profonde : page + sous-onglet (depuis les menus déroulants) */
   const handleNavigateTo = (target: NavTarget) => {
-    setPendingSubTab(target.subTab);
-    setCurrentPage(target.page);
+    switchPage(target.page, target.subTab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Bouton retour du navigateur : restaure la page correspondant à l'URL
+  useEffect(() => {
+    const onPopState = () => {
+      const { page, subTab } = resolveNavigationFromUrl();
+      setCurrentPage(page);
+      setPendingSubTab(subTab);
+      if (page !== 'article') setPageArticle(null);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // SEO par page : title + description + Open Graph mis à jour à chaque navigation
+  useEffect(() => {
+    applyPageMeta(currentPage);
+  }, [currentPage]);
 
   const handleViewClubById = (clubId: string) => {
     const club = liveClubs.find((c) => c.id === clubId) ?? CLUBS_DATA.find((c) => c.id === clubId);
@@ -252,7 +281,6 @@ function AppInner() {
         onNavigate={handleNavigate}
         onNavigateTo={handleNavigateTo}
         onOpenSearch={() => setIsSearchOpen(true)}
-        onOpenSponsoring={() => setIsSponsoringOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenMemberArea={() => {
           setIsAuthOpen(false);
@@ -376,6 +404,8 @@ function AppInner() {
 
         {currentPage === 'contact' && <ContactView />}
 
+        {currentPage === 'sponsoring' && <SponsoringView />}
+
         {currentPage === 'article' && (
           <ArticleView
             article={pageArticle}
@@ -429,11 +459,6 @@ function AppInner() {
       <EspaceClubModal
         isOpen={isClubSpaceOpen}
         onClose={() => setIsClubSpaceOpen(false)}
-      />
-
-      <SponsoringModal
-        isOpen={isSponsoringOpen}
-        onClose={() => setIsSponsoringOpen(false)}
       />
 
       <AuthChoiceModal

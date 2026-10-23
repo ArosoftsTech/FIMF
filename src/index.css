@@ -540,6 +540,35 @@ button.fimf-match-row__team:not(:disabled):hover .fimf-match-row__name {
   transform: translateY(0) scale(0.98);
 }
 
+/* 2bis. Page /sponsoring — balayage lumineux sur les trophées au survol
+   d'une conteneur `.group` (carte de package, argument, partenaire). */
+.fimf-sheen::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-18deg) translateX(-260%);
+  opacity: 0;
+}
+.group:hover > .fimf-sheen::after,
+.group:hover .fimf-sheen::after {
+  animation: fimf-sheen-sweep 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes fimf-sheen-sweep {
+  0%   { transform: skewX(-18deg) translateX(-260%); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: skewX(-18deg) translateX(260%); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .group:hover > .fimf-sheen::after,
+  .group:hover .fimf-sheen::after {
+    animation: none;
+  }
+}
+
 /* 3. Cartes : élévation douce au survol (-6px). Images gérées par les
    classes Tailwind existantes (scale + overflow hidden). */
 .fimf-card-lift {

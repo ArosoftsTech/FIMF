@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Artefacts de purge de secrets (à ne jamais versionner)
+purge_secrets*.py
+secrets_ref*.txt
+replace_real*.txt

@@ -47,6 +47,7 @@ export type NavPage =
   | 'actualites'
   | 'galerie'
   | 'contact'
+  | 'sponsoring'
   | 'admin'
   | 'membre'
   | 'article';
@@ -88,8 +89,6 @@ interface NavbarProps {
   /** Navigation profonde : page + sous-onglet éventuel */
   onNavigateTo?: (target: NavTarget) => void;
   onOpenSearch: () => void;
-  /** Ouvre le formulaire de sponsoring / partenariat */
-  onOpenSponsoring: () => void;
   /** Ouvre le popup « Connexion / Devenir membre » */
   onOpenAuth: () => void;
   /** Ouvre l'espace membre de l'utilisateur connecté */
@@ -169,7 +168,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   onNavigateTo,
   onOpenSearch,
-  onOpenSponsoring,
   onOpenAuth,
   onOpenMemberArea,
   notifications = [],
@@ -409,10 +407,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               />
             </div>
 
+            {/* Sponsoring — redirige vers la page dédiée /sponsoring */}
             <button
-              onClick={onOpenSponsoring}
-              className="fimf-btn-lift inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] active:bg-[#c2410c] rounded-md shadow-xs hover:shadow transition-all duration-150 uppercase tracking-wide cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#ea580c]"
+              onClick={() => handleNavClick('sponsoring')}
+              className={`fimf-btn-lift inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-bold text-white rounded-md shadow-xs hover:shadow transition-all duration-150 uppercase tracking-wide cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#ea580c] ${
+                currentPage === 'sponsoring'
+                  ? 'bg-[#c2410c]'
+                  : 'bg-[#f97316] hover:bg-[#ea580c] active:bg-[#c2410c]'
+              }`}
               title="Devenir partenaire ou sponsor de la FIMF"
+              aria-current={currentPage === 'sponsoring' ? 'page' : undefined}
             >
               <Handshake className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">SPONSORING</span>
@@ -529,14 +533,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 );
               })}
 
-              {/* Actions Sponsoring + Connexion (remplacent Espace Club / Admin) */}
+              {/* Actions Sponsoring + Connexion (remplacent Espace Club / Admin).
+                  Sponsoring : page dédiée /sponsoring (redirection, plus de modal). */}
               <div className="pt-3 mt-2 border-t border-slate-200 grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenSponsoring();
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-bold text-white bg-[#f97316] hover:bg-[#ea580c] rounded-md uppercase tracking-wide cursor-pointer"
+                  onClick={() => handleNavClick('sponsoring')}
+                  className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-bold text-white rounded-md uppercase tracking-wide cursor-pointer ${
+                    currentPage === 'sponsoring' ? 'bg-[#c2410c]' : 'bg-[#f97316] hover:bg-[#ea580c]'
+                  }`}
                 >
                   <Handshake className="w-3.5 h-3.5" />
                   SPONSORING

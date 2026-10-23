@@ -1,7 +1,12 @@
 # Notification email — demandes de sponsoring
 
-Envoie un email à **partenaires@fimf.ci** à chaque nouvelle demande soumise via le
-formulaire SPONSORING du site.
+À chaque nouvelle demande soumise via le formulaire public `/sponsoring`, la
+fonction envoie **deux emails** : l'équipe FIMF (destinataire =
+`sponsor_settings.notify_email`, modifiable dans l'admin → Sponsoring →
+Paramètres de la page ; repli `PARTNER_INBOX`) et un accusé de réception au
+demandeur. Le libellé du package est résolu dynamiquement : table
+`sponsor_packages` (slug → nom) puis repli statique (bronze/argent/or/diamant,
+et les anciennes valeurs silver/gold/platinum).
 
 ## Architecture (déployée et testée E2E ✅)
 
@@ -60,7 +65,8 @@ l'adresse du propriétaire. Pour expédier réellement à `partenaires@fimf.ci` 
 
 | Fonction              | Déclencheur                                   | Effet                                    |
 | --------------------- | --------------------------------------------- | ---------------------------------------- |
-| `sponsor-notification`| INSERT `sponsor_requests`                     | Email à la fédération                    |
+| `sponsor-notification`| INSERT `sponsor_requests`                     | Email équipe FIMF + accusé demandeur     |
+| `sponsor-reminders`   | Cron quotidien (secret `x-reminders-secret`)  | Rappel des contrats finissant sous 30 j  |
 | `member-notification` | INSERT `member_requests`                      | Email à la fédération                    |
 | `member-activate`     | UPDATE `member_requests` → « approuvée »      | Crée `auth.users`, email de bienvenue, purge du mot de passe |
 

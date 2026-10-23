@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminData, FimfPartner, FimfOfficial, FimfCommission } from '@/src/hooks/useAdminData';
-import type { SponsorRequestStatus, MemberRequestStatus } from '@/src/lib/fimfApi';
+import type { MemberRequestStatus } from '@/src/lib/fimfApi';
 import { Club, Match, NewsArticle, Competition, GalleryPhoto, HeroSlide, Player } from '@/src/data/fimfData';
+import { SponsoringModule } from '../admin/sponsoring/SponsoringModule';
 import { ClubBadge } from '../ClubBadge';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../ToastProvider';
@@ -59,6 +60,7 @@ import {
   Menu,
   Mail,
   UserPlus,
+  HeartHandshake,
 } from 'lucide-react';
 
 interface AdminDashboardViewProps {
@@ -81,7 +83,7 @@ type AdminTab =
   | 'gallery'
   | 'stats'
   | 'partners'
-  | 'sponsors'
+  | 'sponsoring'
   | 'members'
   | 'games'
   | 'logs';
@@ -120,7 +122,6 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     officials,
     commissions,
     sponsorRequests,
-    updateSponsorStatus,
     memberRequests,
     updateMemberStatus,
     logs,
@@ -269,7 +270,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     { id: 'gallery', label: 'Médiathèque', icon: Image, badge: `${totalPhotos}` },
     { id: 'stats', label: 'Chiffres Clés', icon: TrendingUp, badge: '4' },
     { id: 'partners', label: 'Partenaires', icon: Handshake, badge: `${partners.length}` },
-    { id: 'sponsors', label: 'Demandes Sponsoring', icon: Mail, badge: `${sponsorRequests.filter((r) => r.status === 'nouvelle').length || sponsorRequests.length}` },
+    { id: 'sponsoring', label: 'Sponsoring', icon: HeartHandshake, badge: `${sponsorRequests.filter((r) => r.status === 'nouvelle').length}` },
     { id: 'members', label: "Demandes d'Adhésion", icon: UserPlus, badge: `${memberRequests.filter((r) => r.status === 'nouvelle').length || memberRequests.length}` },
     { id: 'games', label: 'Jeux & Pronostics', icon: Trophy, badge: `${gamePeriods.length || ''}` },
     { id: 'logs', label: 'Journal d’Audit', icon: FileText, badge: `${logs.length}` },
@@ -2042,87 +2043,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             )}
 
             {/* ------------------------------------------------------------- */}
-            {/* TAB: DEMANDES DE SPONSORING */}
+            {/* TAB : MODULE SPONSORING (5 sous-sections)                      */}
+            {/* Dashboard, packages, demandes, sponsors, paramètres page.     */}
             {/* ------------------------------------------------------------- */}
-            {activeTab === 'sponsors' && (
-              <div className="space-y-5">
-                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <h3 className="text-base font-black text-slate-900 uppercase flex items-center gap-2">
-                    <Handshake className="w-5 h-5 text-[#ea580c]" />
-                    <span>Demandes de Sponsoring & Partenariat ({sponsorRequests.length})</span>
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Solicitations reçues via le formulaire public « SPONSORING ». Suivez leur traitement.
-                  </p>
-                </div>
-
-                {sponsorRequests.length === 0 ? (
-                  <div className="bg-white p-10 rounded-2xl border border-slate-100 shadow-sm text-center">
-                    <Handshake className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm font-bold text-slate-500">Aucune demande pour le moment</p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Les demandes envoyées via le bouton SPONSORING du site apparaîtront ici.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {sponsorRequests.map((r) => (
-                      <div
-                        key={r.id}
-                        className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="text-sm font-black text-slate-900 uppercase">{r.company}</h4>
-                              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-orange-50 text-[#ea580c] border border-orange-200 uppercase">
-                                Pack {r.pack}
-                              </span>
-                            </div>
-                            <p className="text-xs text-slate-600 mt-1">
-                              <b>{r.contactName}</b> — {r.email}
-                              {r.phone && <span> • <span className="font-mono">{r.phone}</span></span>}
-                            </p>
-                            {r.message && (
-                              <p className="text-[11px] text-slate-500 italic mt-1.5 leading-relaxed">« {r.message} »</p>
-                            )}
-                            <p className="text-[10px] text-slate-400 font-mono mt-1.5">Reçue le {r.createdAt}</p>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <select
-                              value={r.status}
-                              onChange={(e) => updateSponsorStatus(r.id, e.target.value as SponsorRequestStatus)}
-                              className={`px-3 py-2 rounded-xl text-xs font-black uppercase border cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ea580c]/50 ${
-                                r.status === 'nouvelle'
-                                  ? 'bg-orange-50 text-[#ea580c] border-orange-200'
-                                  : r.status === 'signée'
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                  : r.status === 'refusée'
-                                  ? 'bg-rose-50 text-rose-700 border-rose-200'
-                                  : 'bg-slate-50 text-slate-700 border-slate-200'
-                              }`}
-                            >
-                              <option value="nouvelle">Nouvelle</option>
-                              <option value="en cours">En cours</option>
-                              <option value="contactée">Contactée</option>
-                              <option value="signée">Signée</option>
-                              <option value="refusée">Refusée</option>
-                            </select>
-                            <a
-                              href={`mailto:${r.email}?subject=${encodeURIComponent('Votre demande de partenariat FIMF')}`}
-                              className="p-2 rounded-xl bg-slate-50 hover:bg-sky-100 text-sky-700 transition-colors"
-                              title={`Répondre à ${r.contactName}`}
-                            >
-                              <Mail className="w-3.5 h-3.5" />
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {activeTab === 'sponsoring' && (
+              <SponsoringModule
+                isAdmin={isAdmin}
+                showFeedback={(msg) => showFeedback(msg)}
+              />
             )}
 
             {/* ------------------------------------------------------------- */}
